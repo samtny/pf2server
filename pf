@@ -1,0 +1,87 @@
+<?php
+
+include('pf-config.php');
+include('pf-crypto.php');
+include('pf-get.php');
+include('pf-post.php');
+
+function pf_log($string) {
+	file_put_contents(PF_LOG_FILE_PF2, $string . "\n", FILE_APPEND);
+}
+
+if ($_POST) {
+	
+	$doc = stripslashes($_POST["doc"]);
+	$hash = $_POST["hash"];
+	
+	pf_log(date("c") . " || post || doc = $doc");
+	
+	if (hash_matches_document($doc, $hash)) {
+		
+		$format = $_POST["format"];
+		
+		if (!$format || $format == 'xml') {
+			
+			$request = new Request();
+			$request->loadXML($doc);
+			
+			$result = process_request($request);
+			
+			if ($result) {
+				
+				if ($result->status->status == "success") {
+					header('HTTP/1.1 200 OK');
+				} else {
+					header("HTTP/1.1 418 I'm a teapot (RFC 2324)");
+				}
+				
+				$resultXml = $result->saveXML();
+				
+				header('Content-Length: ' . strlen($resultXml));
+				header('Content-Type: application/xml;type=result;charset="utf-8"');
+				
+				echo $resultXml;
+				
+			} else {
+				header('HTTP/1.1 500 Internal Server Error');
+			}
+			
+		} else {
+			header("HTTP/1.1 400 Bad Request");
+		}
+		
+	} else {
+		header("HTTP/1.1 400 Bad Request");
+	}
+	
+} else {
+	
+	header('Cache-Control: no-cache, must-revalidate');
+	header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+	
+	//xdebug_start_trace();
+	
+	$q = $_GET["q"]; // query
+	$t = $_GET["t"]; // query type (venue, game, gamelist, special)
+	$n = $_GET["n"]; // near
+	$l = $_GET["l"]; // limit
+	$p = $_GET["p"]; // options (minimal)
+	$f = $_GET["f"]; // format (xml, json)
+	
+	pf_log(date("c") . " || get || q = $q || t = $t || n = $n || l = $l || p = $p || f = $f");
+	
+	$result = get_result($q, $t, $n, $l, $p);
+	
+	if (!$f || $f == 'xml') {
+		header('Content-type: application/xml');
+		echo $result->saveXML();
+	} else if ($f == 'json') {
+		header('Content-type: application/json');
+		echo $result->saveJSON();
+	}
+	
+	//xdebug_stop_trace();
+	
+}
+
+?>
