@@ -1,0 +1,15 @@
+<venues>
+	<venue pfid="10021">
+		<photos>
+			<photo href="http://www.pinballnyc.com/wp-content/uploads/2010/10/Terminator-2_0006_Detail-2.jpg" />
+			<photo href="http://www.pinballnyc.com/wp-content/uploads/2010/10/Terminator-2-Backglass.jpg" />
+		</photos>
+		<badge href="http://www.pinballnyc.com/wp-content/themes/pinballnyc/images/leaguetaken2.gif" />
+	</venue>
+	<venue ipdb="4674">
+		<photos>
+			<photo href="http://www.pinballnyc.com/wp-content/uploads/2010/10/Simpsons-Pinball-Party_0004_Lower-Playfield.jpg" />
+			<photo href="http://www.pinballnyc.com/wp-content/uploads/2010/10/Simpson-Pinball-Party-Backglass-374x276.jpg" />
+		</photos>
+	</venue>
+</venues>
