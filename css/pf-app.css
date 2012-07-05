@@ -1,103 +1,123 @@
-/* 4/9/2012 sam t */
-
-body {
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 100%;
-	line-height: 1.5em;
-}
-
-.appcontainer ul {
-	list-style: none;
-}
-
-.appcontainer li {
-	clear: left;
-}
-
-table {
-	border-collapse: collapse;
-	text-align: left;
-}
-
-select, input {
-	font-family: Arial, Helvetica, sans-serif;
-	border: 0px;
-}
-
-select {
-	background-color: inherit;
-	font-size: 10px;
-}
-
-input.button {
-	padding: .16em .2em .16em .2em;
-}
-
-input.text {
-	padding: .16em .2em .16em .2em;
-}
-
-.colInput {
-	float: left;
-	width: 540px;
-	margin-left: 10px;
-}
-
-.colResult {
-	float: right;
-	width: 380px;
-	margin-right: 10px;
-}
-
-.search li label, .address li label {
-	float: left;
-	width: 100px;
-}
-
-.search li input, .address li input {
-	width: 200px;
-}
-
-.venue {
-	display: none;
-}
-
-.newcomment, .newgame {
-	width: 300px;
-}
-
-.comments ul {
-	padding-left: 0px;
-}
-
-.didyoumean {
-	display: none;
-}
-
-	.didyoumean ul {
-		cursor: pointer;
-	}
-
-.nearby {
-	display: none;
-}
-
-.copyright {
-	clear: both;
-	text-align: center;
-}
-
-
-.yui3-aclist-list {
-	background-color: #fff;
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: 13.33px;
-}
-
-.yui3-aclist-list li {
-	height: 18px;
-}
-
-.yui3-aclist-item-active {
-	
-}
+/* 4/9/2012 sam t */
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 100%;
+	line-height: 1.5em;
+}
+
+a {
+	text-decoration: underline;
+}
+
+.appcontainer ul {
+	list-style: none;
+}
+
+.appcontainer li {
+	clear: left;
+}
+
+table {
+	border-collapse: collapse;
+	text-align: left;
+}
+
+	table th, table td {
+		background-color: inherit;
+		color: inherit;
+		border: 0px;
+		margin: 0.16em 0.2em;
+		padding: 0.16em 0.2em;
+		text-transform: none;
+	}
+
+select, input, #url {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 100%;
+	border: 0px;
+	margin: 0.16em 0.2em;
+	padding: 0.16em 0.2em;
+}
+
+select {
+	background-color: inherit;
+	font-size: 10px;
+}
+
+input.button {
+	padding: .16em .2em .16em .2em;
+}
+
+input.text {
+	padding: .16em .2em .16em .2em;
+}
+
+.colInput {
+	float: left;
+	width: 540px;
+	margin-left: 10px;
+}
+
+.colResult {
+	float: right;
+	width: 380px;
+	margin-right: 10px;
+}
+
+.search li label, .address li label {
+	float: left;
+	width: 100px;
+}
+
+.search li input, .address li input {
+	width: 200px;
+}
+
+.venue {
+	display: none;
+}
+
+.newcomment, .newgame {
+	width: 300px;
+}
+
+.comments {
+	margin: 0.5em 0 1em;
+}
+
+	.comments ul {
+		padding-left: 0px;
+	}
+
+.didyoumean {
+	display: none;
+}
+
+	.didyoumean ul {
+		cursor: pointer;		padding-left: 0px;
+	}
+
+.nearby {
+	display: none;
+}
+
+.copyright {
+	clear: both;
+	text-align: center;
+}
+
+
+.yui3-aclist-list {
+	background-color: #fff;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 13.33px;
+}
+
+.yui3-aclist-list li {
+	height: 18px;
+}
+
+.yui3-aclist-item-active {
+	
+}

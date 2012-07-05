@@ -2,6 +2,7 @@
 "use strict";
 var pf_rel_path = "./pf2";
 var pf_server_url = pf_rel_path + "/pf";
+var pf_app_url = pf_rel_path + "/pf-app.php";
 var tip_url = pf_rel_path + "/pf-util.php?action=gettip";var gamedict_url = "./gamedict.txt";
 var ipdb_machine_url = "http://www.ipdb.org/machine.cgi?id=";
 
@@ -9,7 +10,7 @@ var map;
 var infoWindow;
 
 var markers = [];
-var defaultLimit = 70;
+var defaultLimit = 150;
 
 var didYouMean = [];
 
@@ -137,8 +138,10 @@ function doMapRefresh() {
 		false
 	);
 	
-	var lookupurl = pf_server_url + "?n=" + wrapped.toString();
+	var latLng = wrapped.toString().replace("(", "").replace(")", "").replace(" ", "");
 	
+	var lookupurl = pf_server_url + "?n=" + latLng + "&l=" + defaultLimit;
+
 	$.ajax({
 
 		url: encodeURI(lookupurl),
@@ -325,10 +328,11 @@ function handleGameDictResult(text) {
 	for (var n = 0, len = entries.length, entrySplit; n < len; n++) {
 		entrySplit = entries[n].split("\\f");
 		
-		gameDict[n] = {};
-		gameDict[n].a = entrySplit[0];
-		gameDict[n].d = entrySplit[1];
-		gameDict[n].i = entrySplit[2];
+		gameDict[entrySplit[0]] = {};
+		//gameDict[n].a = entrySplit[0];
+		gameDict[entrySplit[0]].a = entrySplit[0];
+		gameDict[entrySplit[0]].d = entrySplit[1];
+		gameDict[entrySplit[0]].i = entrySplit[2];
 	}
 	
 	YUI().use('datasource', 'autocomplete', 'autocomplete-filters', function (Y) {
@@ -346,11 +350,17 @@ function handleGameDictResult(text) {
 					var t = new RegExp(query, "i");
 					
 					var l = gameDict.length;
-					
+					/*
 					for (var n = 0; n < l; n++) {
 						var e = gameDict[n];
 						if (t.test(e.d)) {
 							r.push(e);
+						}
+					}
+					*/
+					for (var a in gameDict) {
+						if (t.test(gameDict[a].d)) {
+							r.push(gameDict[a]);
 						}
 					}
 					
@@ -464,7 +474,7 @@ function handleVenueSearchResult(xml) {
 						showMarkerInfoWindow(venuekey);
 						
 						// load nearby venues;
-						var nearaddress = street + ' ' + city + ' ' + state;
+						var nearaddress = lat + ',' + lon;
 						doNearbySearch(nearaddress);
 						
 					} else {
@@ -525,8 +535,25 @@ function didYouMeanListClick(li) {
 	var venuekey = $(locxml).attr("key");
 	
 	loadVenue(locxml);
+	
+	if (!isScrolledIntoView($('#map'))) {
+		$(window).scrollTop(0);
+	}
+	
 	showMarkerInfoWindow(venuekey);
 	
+}
+
+// from http://stackoverflow.com/questions/487073/jquery-check-if-element-is-visible-after-scrolling;
+function isScrolledIntoView(elem)
+{
+    var docViewTop = $(window).scrollTop();
+    var docViewBottom = docViewTop + $(window).height();
+
+    var elemTop = $(elem).offset().top;
+    var elemBottom = elemTop + $(elem).height();
+
+    return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
 }
 
 function clearDidYouMean() {
@@ -674,9 +701,9 @@ function refreshGameDisplay() {
 			var nameLabel;
 			
 			if (this.ipdb) {
-				nameLabel = "<a href=\"" + ipdb_machine_url + this.ipdb + "\" target=\"blank\">" + this.desc + "</a>";
+				nameLabel = "<a href=\"" + ipdb_machine_url + this.ipdb + "\" target=\"blank\">" + gameDict[this.abbr].d + "</a>";
 			} else {
-				nameLabel = "<label>" + this.desc + "</label>";
+				nameLabel = "<label>" + gameDict[this.abbr].d + "</label>";
 			}
 			
 			var condSelect = condSelectTemplate.replace("value=\"" + this.cond, "selected=\"selected\" value=\"" + this.cond);
@@ -1106,63 +1133,73 @@ function editButtonClick(button) {
 
 function postVenueToServer() {
 	// this method should not create xml but instead form data, oh well...
-	var loc = $('<loc></loc>');
+	var root;
+	var loc = '<loc';
 	
-	if (venue.key) { $(loc).attr("key", venue.key); }
+	if (venue.key) { loc = loc + ' key="' + venue.key + '"'; }
+	
+	loc = loc + '>';
 	
 	if (venue.updated) {
 		// we are actually gathering the inputs nows;
 		if (venue.isnew) {
-			$(loc).append("<name>" + $('#name').val() + "</name>");
+			loc = loc + "<name>" + $('#name').val() + "</name>";
 		}
-		$(loc).append("<addr>" + $('#street').val() + "</addr>");
-		$(loc).append("<city>" + $('#city').val() + "</city>");
-		$(loc).append("<state>" + $('#state').val() + "</state>");
-		$(loc).append("<zipcode>" + $('#zipcode').val() + "</zipcode>");
-		$(loc).append("<phone>" + $('#phone').val() + "</phone>");
-		$(loc).append("<url>" + $('#url').val() + "</url>");
+		loc = loc + "<addr>" + $('#street').val() + "</addr>";
+		loc = loc + "<city>" + $('#city').val() + "</city>";
+		loc = loc + "<state>" + $('#state').val() + "</state>";
+		loc = loc + "<zipcode>" + $('#zipcode').val() + "</zipcode>";
+		loc = loc + "<phone>" + $('#phone').val() + "</phone>";
+		loc = loc + "<url>" + $('#url').val() + "</url>";
 	}
 	
 	$(gameList).each(function () {
 		if (this.deleted || this.updated) {
-			var game = $('<game></game>');
+			
+			var game = '<game';
+			
 			if (this.key) {
-				$(game).attr("key", this.key);
+				game = game + ' key="' + this.key + '"';
+				if (this.deleted) {
+					game = game + ' deleted="1"';
+				}
+				game = game + '>';
 			} else {
-				$(game).append("<abbr>" + this.abbr + "</abbr>");
+				if (!this.deleted) {
+					game = game + "><abbr>" + this.abbr + "</abbr>";
+				} else {
+					game = game + ">";
+				}
 			}
-			if (this.deleted) {
-				$(game).attr("deleted", "1");
-			} else {
-				$(game).append("<cond>" + this.cond + "</cond>");
-				$(game).append("<price>" + this.price + "</price>");
+			if (!this.deleted) {
+				game = game + "<cond>" + this.cond + "</cond>";
+				game = game + "<price>" + this.price + "</price>";
 			}
-			$(loc).append(game);
+			
+			game = game + '</game>';
+			
+			loc = loc + game;
 		}
 	});
 	
 	$(commentList).each(function () {
 		if (this.isnew) {
-			// for some reason ie7 does not like it any other way than this way;
-			var c = "<comment_><ctext>" + this.ctext + "</ctext></comment_>";
-			$(loc).append(c);
+			var c = "<comment><ctext>" + this.ctext + "</ctext></comment>";
+			loc = loc + c;;
 		}
 	});
 	
-	//alert($loc.wrap("<span></span>").parent().html());
-	var appxml = $('<pinfinderapp></pinfinderapp>').append(loc);
-	
-	// omg, ie7 hates ".html()";
-	var payload = $(appxml).wrap("<span></span>").parent().html();
-	//alert(payload);
+	loc = loc + '</loc>';
+	root = '<pinfinderapp><locations>' + loc + '</locations></pinfinderapp>';
+		
 	//var captcha = $('#captcha_code').val();
 	
 	$.ajax({
 		type: "POST",
-		url: "pinfinderapp.php",
+		url: pf_app_url,
 		cache: false,
 		data: {
-			locxml: payload//,
+			locxml: root//,
 			//captcha_code: captcha
 			}
 	}).done(function (data) {
@@ -1180,12 +1217,10 @@ function postVenueToServer() {
 				this.isnew = false;
 			});
 			
-			//alert("Your edits were successfully saved to the server!  If this is a new location, it will appear on the map after it has been approved.");
-			// todo; update status label...
 		} else {
 			alert("The server encountered an error saving your edits.  Please try again.");
 		}
-		//alert(data);
+		
 	});
 	
 }

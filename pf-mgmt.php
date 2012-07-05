@@ -1,7 +1,5 @@
 <?php
 session_start();
-$lifetime = 365*24*60*60;
-setcookie(session_name(),session_id(),time()+$lifetime);
 ?>
 <?php
 include('pf-config.php');
@@ -257,7 +255,7 @@ if ($locxml) {
 			width: 100%;
 		}
 		
-	.recent ul {
+	.recent ul, .flagged ul {
 		list-style: none;
 		padding-left: 0px;
 	}
@@ -364,6 +362,11 @@ if ($locxml) {
 					
 				</tbody>
 			</table>
+		</div>
+		<div class="flagged">
+			<h3>Recently Flagged</h3>
+			<ul>
+			</ul>
 		</div>
 		<div class="recent">
 			<h3>Recent Activity</h3>
