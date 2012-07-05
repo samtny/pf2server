@@ -1,0 +1,125 @@
+<?php
+
+include('pf-class.php');
+include('pf-crypto.php');
+include('pf-util.php');
+
+include('fsq-config.php');
+include('fsq-get.php');
+include('fsq-post.php');
+
+function fsq_log($string) {
+	file_put_contents(FSQ_LOG_FILE, $string . "\n", FILE_APPEND);
+}
+
+$protectedActions = array( "checkinlist", "checkin", "venuephotos" );
+
+if ($_POST) {
+	
+	$action = $_POST["action"];
+	$ll = $_POST["ll"];
+	$limit = $_POST["limit"];
+	$uuid = $_POST["uuid"];
+	$time = $_POST["time"];
+	$venueid = $_POST["venueid"];
+	$shout = $_POST["shout"];
+	$eventid = $_POST["eventid"];
+	$hash = $_POST["hash"];
+	$f = $_POST["f"];
+	
+	$valid = in_array($action, $protectedActions) ? hash_matches_array($_POST) : true;
+	
+	fsq_log("method POST : action $action : ll $ll : limit $limit : uuid $uuid : time $time : venueid $venueid : shout $shout : eventid $eventid : hash $hash : f $f : valid $valid");
+	
+	if ($valid) {
+		
+		if (isset($time)) {
+			
+			if (time_okay($time)) {
+				
+				$result = fsq_post_result($action, $ll, $uuid, $venueid, $shout, $eventid);
+				
+				if (!$f || $f == 'xml') {
+					header('Content-type: application/xml charset=\"utf-8\"');
+					echo $result->saveXML();
+				} else if ($f == 'json') {
+					header('Content-type: application/json charset=\"utf-8\"');
+					echo $result->saveJSON();
+				}
+				
+			} else {
+				
+				rick_roll();
+				
+			}
+			
+		} else {
+			
+			header("HTTP/1.1 400 Bad Request");
+			
+		}
+		
+	} else {
+		
+		header("HTTP/1.1 400 Bad Request");
+		
+	}
+	
+} else {
+	
+	$action = $_GET["action"];
+	$ll = $_GET["ll"];
+	$limit = $_GET["limit"];
+	$uuid = $_GET["uuid"];
+	$time = $_GET["time"];
+	$venueid = $_GET["venueid"];
+	$hash = $_GET["hash"];
+	$f = $_GET["f"];
+	
+	$valid = in_array($action, $protectedActions) ? hash_matches_array($_GET) : true;
+	
+	fsq_log("method GET : action $action : ll $ll : limit $limit : uuid $uuid : time $time : venueid $venueid : shout $shout : eventid $eventid : hash $hash : f $f : valid $valid");
+	
+	if ($valid) {
+		
+		if (isset($time)) {
+			
+			if (time_okay($time)) {
+			
+				$result = fsq_get_result($action, $ll, $limit, $uuid, $venueid);
+				
+				if (!$f || $f == 'xml') {
+					header('Content-type: application/xml charset=\"utf-8\"');
+					echo $result->saveXML();
+				} else if ($f == 'json') {
+					header('Content-type: application/json charset=\"utf-8\"');
+					echo $result->saveJSON();
+				}
+				
+			} else {
+				
+				rick_roll();
+				
+			}
+			
+		} else {
+			
+			header("HTTP/1.1 400 Bad Request");
+			
+		}
+		
+	} else {
+		
+		header("HTTP/1.1 400 Bad Request");
+		
+	}
+	
+}
+
+function time_okay($time) {
+	
+	return isset($time) && (float)$time >= strtotime("-1 day") && (float)$time <= strtotime("+1 day");
+	
+}
+
+?>
