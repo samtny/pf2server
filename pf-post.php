@@ -73,7 +73,8 @@ function process_request($request) {
 		$n;
 		$l = 1;
 		$p = "nofilter";
-		$saved = get_venue_result($q, $t, $n, $l, $p);
+		$o;
+		$saved = get_venue_result($q, $t, $n, $l, $p, $o);
 		
 		if (count($saved->venues) > 0) {
 			$result->venues[] = $saved->venues[0];

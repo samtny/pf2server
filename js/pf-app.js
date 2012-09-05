@@ -542,6 +542,12 @@ function didYouMeanListClick(li) {
 	
 	showMarkerInfoWindow(venuekey);
 	
+	var lat = $(locxml).find("lat").text();
+	var lon = $(locxml).find("lon").text();
+	
+	var nearaddress = lat + ',' + lon;
+	doNearbySearch(nearaddress);
+	
 }
 
 // from http://stackoverflow.com/questions/487073/jquery-check-if-element-is-visible-after-scrolling;
@@ -721,6 +727,7 @@ function refreshGameDisplay() {
 }
 
 function disableSaveButtonAnimated(animated) {
+	return;
 	if (animated) {
 		$('#savebutton').attr("disabled", "disabled").delay(500).fadeOut("fast");
 	} else {
@@ -729,6 +736,7 @@ function disableSaveButtonAnimated(animated) {
 }
 
 function enableSaveButtonAnimated(animated) {
+	return;
 	if (animated) {
 		$('#savebutton').removeAttr("disabled").fadeIn("fast");
 	} else {
@@ -1083,6 +1091,8 @@ function saveVenueButtonClick() {
 	//	alert('Please enter the captcha code to save your edits...');
 	//}
 	
+	$('#savebutton').removeAttr('disabled');
+	
 	disableSaveButtonAnimated(true);
 	
 }
@@ -1109,6 +1119,8 @@ function saveVenue() {
 	}
 	if (updated) {
 		postVenueToServer();
+	} else {
+		alert("Nothing to save!");
 	}
 }
 
@@ -1204,6 +1216,10 @@ function postVenueToServer() {
 			}
 	}).done(function (data) {
 		
+		//var xmlString = (new XMLSerializer()).serializeToString(data);
+		//alert(xmlString);
+		//return;
+		
 		var status = $(data).find('status').text();
 		if (status === "success") {
 			
@@ -1216,6 +1232,8 @@ function postVenueToServer() {
 			$(commentList).each(function () {
 				this.isnew = false;
 			});
+			
+			alert("Venue saved successfully.  If this is a new venue, it will show on the map once it is approved.");
 			
 		} else {
 			alert("The server encountered an error saving your edits.  Please try again.");
