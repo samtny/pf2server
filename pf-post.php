@@ -4,10 +4,31 @@ include_once('pf-config.php');
 include_once('pf-class.php');
 include_once('pf-string.php');
 include_once('pf-get.php');
+include_once('pf-token.php');
+include_once('pf-user.php');
 
 function process_request($request) {
 	
 	$result = new Result();
+	
+	$userid;
+	
+	$user = $request->user;
+	if ($user) {
+		$userid = $user->id;
+		if (!$userid) {
+			foreach ($user->tokens as $token) {
+				$userid = userid_for_service_token($token->service, $token->token);
+				if ($userid) break;
+			}
+		}
+		if (!$userid) {
+			$userid = insert_dummy_user();
+		}
+		foreach ($user->tokens as $token) {
+			freshen_user_service_token($userid, $token->service, $token->token);
+		}
+	}
 	
 	foreach ($request->venues as $venue) {
 		
@@ -30,7 +51,7 @@ function process_request($request) {
 		}
 		
 		if (!$id) {
-			$id = insert_venue($name, $street, $city, $state, $zipcode, $phone, $url);
+			$id = insert_venue($name, $street, $city, $state, $zipcode, $phone, $url, $userid);
 		}
 		
 		foreach ($venue->games as $game) {
@@ -195,14 +216,14 @@ function update_game($gid, $cond, $price) {
 	
 }
 
-function insert_venue($name, $street, $city, $state, $zipcode, $phone, $url) {
+function insert_venue($name, $street, $city, $state, $zipcode, $phone, $url, $userid) {
 	
 	$id;
 	
 	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
 	$db_selected = mysql_select_db(DB_NAME, $link);
 	
-	$sql = "insert into venue (name, nameclean, street, city, state, zipcode, phone, url, updatedate) values (";
+	$sql = "insert into venue (name, nameclean, street, city, state, zipcode, phone, url, updatedate, source, sourceid) values (";
 	
 	$sql .= $name != null ? "'" . mysql_real_escape_string($name) . "' " : "null";
 	
@@ -221,6 +242,10 @@ function insert_venue($name, $street, $city, $state, $zipcode, $phone, $url) {
 	$sql .= $url != null ? ", '" . mysql_real_escape_string($url) . "' " : ", null ";
 	
 	$sql .= ", NOW() ";
+	
+	$sql .= ($userid && $userid != null) ? ", 'user' " : ", null ";
+	
+	$sql .= ($userid && $userid != null) ? ", '" . mysql_real_escape_string($userid) . "' " : ", null ";
 	
 	$sql .= ")";
 	
@@ -304,8 +329,9 @@ function lookup_venue_id($name, $street, $city, $state) {
 	$n = $street . ' ' . $city . ' ' . $state;
 	$l = 1;
 	$p;
+	$o;
 	
-	$result = get_venue_result($q, $t, $n, $l, $p);
+	$result = get_venue_result($q, $t, $n, $l, $p, $o);
 	
 	if ($result && count($result->venues) == 1 && $result->venues[0]->dist && $result->venues[0]->dist <= PF_SAME_VENUE_MILES) {
 		$id = $result->venues[0]->id;

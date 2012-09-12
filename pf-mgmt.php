@@ -2,9 +2,11 @@
 session_start();
 ?>
 <?php
-include('pf-config.php');
-include('pf-class.php');
-include('pf-crypto.php');
+include_once('pf-config.php');
+include_once('pf-class.php');
+include_once('pf-crypto.php');
+include_once('pf-notify.php');
+include_once('pf-apns.php');
 ?>
 <?php
 // mostly from here; http://www.devarticles.com/c/a/MySQL/PHP-MySQL-and-Authentication-101/3/
@@ -40,6 +42,44 @@ function approve_venue($venueid) {
 	
 }
 
+function add_venue_approved_user_notification_message($venueid) {
+	
+	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+	$db_selected = mysql_select_db(DB_NAME, $link);
+	
+	$sql = "select name, sourceid from venue where source = 'user' and venueid = " . mysql_real_escape_string($venueid) . "";
+	
+	$result = mysql_query($sql);
+	
+	if ($result) {
+		$row = mysql_fetch_assoc($result);
+		if ($row) {
+			
+			$venueName = $row['name'];
+			$message = sprintf(PF_NEW_LOCATION_APPROVED_MSG_TEMPLATE, $venueName);
+			
+			$touserid = $row['sourceid'];
+			
+			$extra = "q=" . $venueid;
+			
+			if (strlen($touserid) > 0) {
+			
+				$n = new Notification();
+				$n->message = $message;
+				$n->touserid = $touserid;
+				$n->extra = $extra;
+				
+				save_notifications(array($n));
+				
+			}
+			
+		}
+	} else {
+		trigger_error(mysql_error());
+	}
+
+}
+
 ?>
 <?php
 header ("Content-Type:text/xml");
@@ -49,12 +89,16 @@ $action = stripslashes($_POST["action"]);
 if ($locxml) {
 	
 	if ($action == "approvevenue") {
+	
 		$req = new Request();
 		$req->loadXML($locxml);
+		
 		if (count($req->venues) == 1) {
 			
 			$id = $req->venues[0]->id;
+			
 			approve_venue($id);
+			add_venue_approved_user_notification_message($id);
 			
 			$url = PF_ENDPOINT_PF2 . "?q=$id";
 			$ch = curl_init($url);
@@ -62,6 +106,7 @@ if ($locxml) {
 			curl_close($ch);
 			
 		}
+		
 	} else if ($action == "updatevenue") {
 		
 		$hash = compute_hash($locxml);
@@ -152,6 +197,17 @@ if ($locxml) {
 		trigger_error(mysql_error());
 		print "<pinfinderapp><status>failure</status></pinfinderapp>";
 	}
+	
+} else if ($action == "sendnotifications") {
+	
+	$notifications = get_pending_notifications();
+	
+	if ($notifications && count($notifications) > 0) {
+		send_apns_notifications($notifications);
+		mark_notifications_delivered($notifications);
+	}
+	
+	print "<pinfinderapp><status>success</status></pinfinderapp>";
 	
 }
 
@@ -308,6 +364,10 @@ if ($locxml) {
 					
 				</tbody>
 			</table>
+		</div>
+		<div class="notifications">
+			<h3>Pending Notifications</h3>
+			<input type="button" value="Send Notifications" onclick="sendNotifications(this)" /> 
 		</div>
 		<div class="addresschanges">
 			<h3>Address Changed:</h3>

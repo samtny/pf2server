@@ -8,6 +8,8 @@ include_once('pf-string.php');
 function get_result($q, $t, $n, $l, $p, $o) {
 	if ($t == "gamelist") {
 		return get_gamelist_result($q, $l);
+	} else if ($t == "stats") {
+		return get_stats_result();
 	} else {
 		return get_venue_result($q, $t, $n, $l, $p, $o);
 	}
@@ -409,6 +411,43 @@ function get_gamelist_result($q, $l) {
 		$result->status = "success";
 	} else {
 		$result->status = "nomatch";
+	}
+	
+	return $result;
+	
+}
+
+function get_stats_result() {
+
+	$result = new Result();
+	
+	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+	$db_selected = mysql_select_db(DB_NAME, $link);
+	
+	$sql = "select count(*) as ncount from notification n inner join user u on n.touserid = u.userid where n.delivered = 0";
+	
+	$sresult = mysql_query($sql);
+	
+	if ($sresult) {
+		
+		$row = mysql_fetch_assoc($sresult);
+		
+		$ncount;
+		if ($row == FALSE) {
+			$ncount = 0;
+		} else {
+			$ncount = $row['ncount'];
+		}
+		
+		$stats = new Stats();
+		$stats->notifications = $ncount;
+		
+		$result->meta->stats = $stats;
+		
+		$result->status->status = "success";
+		
+	} else {
+		$result->status->status = "error";
 	}
 	
 	return $result;
