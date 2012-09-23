@@ -4,10 +4,7 @@ include('pf-config.php');
 include('pf-crypto.php');
 include('pf-get.php');
 include('pf-post.php');
-
-function pf_log($string) {
-	file_put_contents(PF_LOG_FILE_PF2, $string . "\n", FILE_APPEND);
-}
+include('pf-log.php');
 
 if ($_POST) {
 	

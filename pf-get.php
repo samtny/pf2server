@@ -424,7 +424,7 @@ function get_stats_result() {
 	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
 	$db_selected = mysql_select_db(DB_NAME, $link);
 	
-	$sql = "select count(*) as ncount from notification n inner join user u on n.touserid = u.userid where n.delivered = 0";
+	$sql = "select count(*) as ncount from notification n where n.delivered = 0";
 	
 	$sresult = mysql_query($sql);
 	

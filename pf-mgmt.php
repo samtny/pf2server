@@ -168,6 +168,21 @@ if ($locxml) {
 		print "<pinfinderapp><status>failure</status></pinfinderapp>";
 	}
 	
+} else if ($action == "deleteglobalnotification") {
+
+	$key = stripslashes($_POST["key"]);
+	$sql = "delete from notification where global = 1 and notificationid = " . mysql_real_escape_string($key);
+	
+	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+	$db_selected = mysql_select_db(DB_NAME, $link);	
+	$result = mysql_query($sql);
+	
+	if ($result == 1) {
+		print "<pinfinderapp><status>success</status></pinfinderapp>";
+	} else {
+		print "<pinfinderapp><status>failure</status></pinfinderapp>";
+	}
+	
 } else if ($action == "deletevenue") {
 	
 	$key = stripslashes($_POST["key"]);
@@ -208,6 +223,74 @@ if ($locxml) {
 	}
 	
 	print "<pinfinderapp><status>success</status></pinfinderapp>";
+	
+} else if ($action == "saveglobalnotification") {
+	
+	$message = stripslashes($_POST["message"]);
+	$extra = stripslashes($_POST["extra"]);
+	
+	if ($message) {
+		
+		$n = new Notification();
+		$n->message = $message;
+		$n->extra = $extra;
+		$n->global = TRUE;
+		
+		save_notifications(array($n));
+		
+		print "<pinfinderapp><status>success</status></pinfinderapp>";
+		
+	} else {
+		
+		print "<pinfinderapp><status>error</status></pinfinderapp>";
+		
+	}
+	
+}
+
+?>
+<?php elseif ($_GET['q']) : ?>
+<?php 
+header ("Content-Type:application/json");
+
+class MgmtResponse {
+	public $status = "none";
+	public $notifications = array();
+}
+
+$q = $_GET['q'];
+
+if ($q == "globalnotifications") {
+	
+	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+	$db_selected = mysql_select_db(DB_NAME, $link);
+	
+	$sql = "select notificationid, message, extra from notification where global = 1 and delivered = 0 order by createdate";
+	
+	$result = mysql_query($sql);
+	
+	$response = new MgmtResponse();
+	
+	if ($result) {
+		
+		while ($row = mysql_fetch_assoc($result)) {
+			
+			$n = new Notification();
+			$n->id = $row['notificationid'];
+			$n->message = $row['message'];
+			$n->extra = $row['extra'];
+			
+			$response->notifications[] = $n;
+			
+		}
+		
+		$response->status = "success";
+		
+	} else {
+		$response->status = "sqlerror";
+	}
+	
+	echo json_encode($response);
 	
 }
 
@@ -311,7 +394,7 @@ if ($locxml) {
 			width: 100%;
 		}
 		
-	.recent ul, .flagged ul {
+	.recent ul, .flagged ul, .globalnotify ul {
 		list-style: none;
 		padding-left: 0px;
 	}
@@ -364,10 +447,6 @@ if ($locxml) {
 					
 				</tbody>
 			</table>
-		</div>
-		<div class="notifications">
-			<h3>Pending Notifications</h3>
-			<input type="button" value="Send Notifications" onclick="sendNotifications(this)" /> 
 		</div>
 		<div class="addresschanges">
 			<h3>Address Changed:</h3>
@@ -422,6 +501,18 @@ if ($locxml) {
 					
 				</tbody>
 			</table>
+		</div>
+		<div class="notifications">
+			<h3>Pending Notifications</h3>
+			<input type="button" value="Send Notifications" onclick="sendNotifications(this)" /> 
+		</div>
+		<div class="globalnotify">
+			<h3>Global Notifications</h3>
+			<ul>
+			</ul>
+			Message: <input type="text" class="globalmessage" />
+			Extra: <input type="text" class="globalextra" />
+			<input type="button" value="Add" onclick="addGlobalNotification(this)" />
 		</div>
 		<div class="flagged">
 			<h3>Recently Flagged</h3>

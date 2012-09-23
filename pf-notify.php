@@ -9,7 +9,7 @@ function get_pending_notifications() {
 	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
 	$db_selected = mysql_select_db(DB_NAME, $link);
 	
-	$sql = "select notificationid, message, touserid, extra from notification ";
+	$sql = "select notificationid, message, touserid, global, extra from notification ";
 	$sql .= "where delivered = 0 ";
 	$sql .= "and DATEDIFF(NOW(), createdate) < " . mysql_real_escape_string(PF_NOTIFICATION_MAX_AGE_DAYS) . "";
 	
@@ -22,6 +22,7 @@ function get_pending_notifications() {
 			$id = $row['notificationid'];
 			$message = $row['message'];
 			$touserid = $row['touserid'];
+			$global = $row['global'];
 			$extra = $row['extra'];
 			
 			$n = new Notification();
@@ -29,6 +30,7 @@ function get_pending_notifications() {
 			$n->id = $id;
 			$n->message = $message;
 			$n->touserid = $touserid;
+			$n->global = $global;
 			$n->extra = $extra;
 			
 			$notifications[] = $n;
@@ -77,17 +79,19 @@ function save_notifications($notifications) {
 	
 	foreach ($notifications as $n) {
 		
-		$sql = "insert into notification (message, touserid, extra) ";
+		$sql = "insert into notification (message, touserid, extra, global) ";
 		$sql .= "values (";
 		$sql .= "'" . mysql_real_escape_string($n->message) . "'";
-		$sql .= ", '" . mysql_real_escape_string($n->touserid) . "'";
+		$sql .= $n->touserid ? ", '" . mysql_real_escape_string($n->touserid) . "'" : ", null";
 		$sql .= ", '" . mysql_real_escape_string($n->extra) . "'";
+		$sql .= ", " . mysql_real_escape_string(($n->global == 1 || $n->global == TRUE) ? 1 : 0) . "";
 		$sql .= ")";
 		
 		$result = mysql_query($sql);
 		
 		if (!$result) {
 			// TODO: log message save error
+			return mysql_error();
 		}
 	
 	}
