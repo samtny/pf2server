@@ -7,6 +7,9 @@ include_once('pf-class.php');
 include_once('pf-crypto.php');
 include_once('pf-notify.php');
 include_once('pf-apns.php');
+include_once('pf-tournament.php');
+include_once('pf-ifpa.php');
+include_once('pf-batch.php');
 ?>
 <?php
 // mostly from here; http://www.devarticles.com/c/a/MySQL/PHP-MySQL-and-Authentication-101/3/
@@ -246,6 +249,41 @@ if ($locxml) {
 		
 	}
 	
+} else if ($action == "associatetournamentvenue") {
+	
+	$tournamentid = $_POST["tournamentid"];
+	$venueid = $_POST["venueid"];
+	
+	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+	$db_selected = mysql_select_db(DB_NAME, $link);
+	
+	$sql = "update tournament set venueid = " . mysql_real_escape_string($venueid) . " where tournamentid = " . mysql_real_escape_string($tournamentid);
+	
+	$result = mysql_query($sql);
+	
+	if ($result == 1) {
+		echo "<pinfinderapp><status>success</status></pinfinderapp>";
+	} else {
+		echo "<pinfinderapp><status>error</status></pinfinderapp>";
+	}
+	
+} else if ($action == "omittournament") {
+	
+	$tournamentid = $_POST["tournamentid"];
+	
+	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+	$db_selected = mysql_select_db(DB_NAME, $link);
+	
+	$sql = "update tournament set omit = 1 where tournamentid = " . mysql_real_escape_string($tournamentid);
+	
+	$result = mysql_query($sql);
+	
+	if ($result == 1) {
+		echo "<pinfinderapp><status>success</status></pinfinderapp>";
+	} else {
+		echo "<pinfinderapp><status>error</status></pinfinderapp>";
+	}
+	
 }
 
 ?>
@@ -256,6 +294,7 @@ header ("Content-Type:application/json");
 class MgmtResponse {
 	public $status = "none";
 	public $notifications = array();
+	public $tournaments = array();
 }
 
 $q = $_GET['q'];
@@ -290,6 +329,29 @@ if ($q == "globalnotifications") {
 		$response->status = "sqlerror";
 	}
 	
+	echo json_encode($response);
+	
+} elseif ($q == "upcomingtournaments") {
+	
+	$response = new MgmtResponse();
+	$response->tournaments = get_untagged_tournaments();
+	$response->status = "success";
+	echo json_encode($response);
+	
+} else if ($q == "refreshifpatournaments") {
+	
+	$tournaments = get_ifpa_tournaments_from_feed();
+	save_new_tournaments($tournaments);
+	
+	$response = new MgmtResponse();
+	$response->status = "success";
+	echo json_encode($response);
+	
+} else if ($q == "refreshgamedict") {
+	
+	freshen_gamedict();
+	$response = new MgmtResponse();
+	$response->status = "success";
 	echo json_encode($response);
 	
 }
@@ -394,7 +456,7 @@ if ($q == "globalnotifications") {
 			width: 100%;
 		}
 		
-	.recent ul, .flagged ul, .globalnotify ul {
+	.recent ul, .flagged ul, .globalnotify ul, .tournaments ul {
 		list-style: none;
 		padding-left: 0px;
 	}
@@ -513,6 +575,17 @@ if ($q == "globalnotifications") {
 			Message: <input type="text" class="globalmessage" />
 			Extra: <input type="text" class="globalextra" />
 			<input type="button" value="Add" onclick="addGlobalNotification(this)" />
+		</div>
+		<div class="tournaments">
+			<h3>Upcoming Tournaments</h3>
+			<input type="button" value="Refresh IFPA Tournaments" onclick="refreshIFPATournaments(this)" />
+			<label>Associate Venue:</label><input type="text" class="tourneyvenue"></input>
+			<ul>
+			</ul>
+		</div>
+		<div class="maintenance">
+			<h3>Maintenance</h3>
+			<input type="button" value="Refresh gamedict.txt" onclick="refreshGamedict(this)" />
 		</div>
 		<div class="flagged">
 			<h3>Recently Flagged</h3>

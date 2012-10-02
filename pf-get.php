@@ -67,7 +67,8 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 	$venueSql .= 	"g.gameid, g.abbreviation, g.name as gamename, g.ipdb, g.new, g.rare, g.year as gameyear, mf.shortname as manufacturer, ";
 	$venueSql .=	"cs.total as commentcount, ";
 	$venueSql .=	"im.total as imagecount, ";
-	$venueSql .=	"l.total as leaguecount ";
+	$venueSql .=	"l.total as leaguecount, ";
+	$venueSql .= 	"t.datefrom as tournamentdate ";
 	$venueSql .= "from ( ";
 	
 	$venueSql .= "select v.venueid, v.name as venuename, v.street, v.city, v.state, v.zipcode, v.neighborhood, v.country, v.phone, X(v.coordinate) as latitude, Y(v.coordinate) as longitude, v.url, v.foursquareid, v.flag, v.updatedate as venueupdated, v.createdate as venuecreated, ";
@@ -122,10 +123,12 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 				case "museum":
 					$venueSql .= "and (v.name like '%museum%' or v.nameclean like '%museum%') ";
 					break;
+				case "upcomingtournaments":
+					$venueSql .= "and v.venueid in (select t.venueid from tournament t where (DATEDIFF(NOW(), t.datefrom) <=0 or DATEDIFF(NOW(), t.datethru) <=0)) ";
+					break;
 				default:
 					$venueSql .= "and 1 = 0 ";
 					break;
-				
 			}
 		} else if ($t == "mgmt") {
 			switch ($q) {
@@ -178,7 +181,17 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 	$venueSql .=	"left outer join (select venueid, count(*) as total from comment group by venueid) cs on v.venueid = cs.venueid ";
 	$venueSql .= 	"left outer join (select venueid, count(*) as total from image group by venueid) im on v.venueid = im.venueid ";
 	$venueSql .= 	"left outer join (select venueid, count(*) as total from leaguevenue group by venueid) l on v.venueid = l.venueid ";
-	$venueSql .= "order by $venueOrder, g.name, g.gameid ";
+	$venueSql .= 	"left outer join (select venueid, min(datefrom) as datefrom from tournament where venueid is not null and (DATEDIFF(NOW(), datefrom) <= 0 or DATEDIFF(NOW(), datethru) <= 0) group by venueid) t on v.venueid = t.venueid ";
+	
+	$finalOrder;
+	
+	if ($t == "special" && $q == "upcomingtournaments") {
+		$finalOrder = "t.datefrom, v.venuename, v.venueid";
+	} else {
+		$finalOrder = $venueOrder;
+	}
+	
+	$venueSql .= "order by $finalOrder, g.name, g.gameid ";
 	
 	$vresult = mysql_query($venueSql);
 	if ($vresult) {
@@ -245,6 +258,24 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 								$venue->addComment($comment);
 							}
 							mysql_free_result($cresult);
+						}
+					}
+					
+					if ((int)$vrow["tournamentdate"] > 0) {
+						$tournamentsql = "select t.tournamentid, t.name, t.datefrom, t.datethru, t.ifpaid from tournament t where t.venueid = " . $vrow["venueid"] . " and (DATEDIFF(NOW(), t.datefrom) <= 0 or DATEDIFF(NOW(), t.datethru) <= 0) order by t.datefrom ";
+						$tresult = mysql_query($tournamentsql);
+						if ($tresult) {
+							while ($trow = mysql_fetch_assoc($tresult)) {
+								$t = new Tournament();
+								$t->id = $trow["tournamentid"];
+								$t->name = $trow["name"];
+								$t->dateFrom = $trow["datefrom"];
+								$t->dateThru = $trow["datethru"];
+								$t->ifpaId = $trow["ifpaid"];
+								$t->venueId = $vrow["venueid"];
+								$venue->addTournament($t);
+							}
+							mysql_free_result($tresult);
 						}
 					}
 					
