@@ -1,0 +1,6 @@
+<Files pf>
+ForceType application/x-httpd-php
+</Files>
+<Files fsq>
+ForceType application/x-httpd-php
+</Files>

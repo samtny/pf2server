@@ -1,6 +1,6 @@
 <?php
 
-include('pf-config.php');
+include_once('pf-config.php');
 include_once('pf-class.php');
 
 function get_geocode_result($query) {
@@ -254,6 +254,66 @@ function save_address_result($address, $lonlatstring, $sw, $ne) {
 	}
 	
 	return $id;
+	
+}
+
+function google_reverse_geocode_result($latlon) {
+	
+	$rgresult;
+	
+	$base_url = "http://" . GOOGLE_MAPS_HOST . "/maps/api/geocode/xml?";
+	
+	$request_url = $base_url . "latlng=" . $latlon . "&sensor=false";
+	
+	$ch = curl_init($request_url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_HEADER, 0);
+	$response = curl_exec($ch);
+	curl_close($ch);
+	
+    $xml = simplexml_load_string($response) or die();
+	
+	$result = $xml->result[0];
+	//print $xml->asXML();
+	
+	if ($result) {
+		
+		$rgresult = new ReverseGeocodeResult();
+		
+		$i = 0;
+		$part = $result->address_component[$i];
+		while ($part) {
+			
+			$type = $part->type[0];
+			$name = $part->long_name[0];
+			$short = $part->short_name[0];
+			
+			
+			if (strcmp($type, "street_number") == 0) {
+				$rgresult->street = $name;
+			} else if (strcmp($type, "route") == 0) {
+				$rgresult->street = $rgresult->street . " " . $name;
+			} else if (strcmp($type, "sublocality") == 0) {
+				$rgresult->city = $name;
+			} else if (strcmp($type, "locality") == 0 && !$city) {
+				$rgresult->city = $name;
+			} else if (strcmp($type, "administrative_area_level_1") == 0) {
+				$rgresult->state = $name;
+				$rgresult->stateshort = $short;
+			} else if (strcmp($type, "country") == 0) {
+				$rgresult->country = $name;
+			} else if (strcmp($type, "postal_code") == 0) {
+				$rgresult->zip = $name;
+			} else if (strcmp($type, "neighborhood") == 0) {
+				$rgresult->neighborhood = $name;
+			}
+			
+			$i = $i + 1;
+			$part = $result->address_component[$i];
+		}
+	}
+	
+	return $rgresult;
 	
 }
 

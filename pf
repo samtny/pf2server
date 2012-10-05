@@ -4,10 +4,7 @@ include('pf-config.php');
 include('pf-crypto.php');
 include('pf-get.php');
 include('pf-post.php');
-
-function pf_log($string) {
-	file_put_contents(PF_LOG_FILE_PF2, $string . "\n", FILE_APPEND);
-}
+include('pf-log.php');
 
 if ($_POST) {
 	
@@ -51,6 +48,7 @@ if ($_POST) {
 		}
 		
 	} else {
+		pf_log(date("c") . " || bad hash");
 		header("HTTP/1.1 400 Bad Request");
 	}
 	
@@ -66,11 +64,12 @@ if ($_POST) {
 	$n = $_GET["n"]; // near
 	$l = $_GET["l"]; // limit
 	$p = $_GET["p"]; // options (minimal)
+	$o = $_GET["o"]; // order
 	$f = $_GET["f"]; // format (xml, json)
 	
 	pf_log(date("c") . " || get || q = $q || t = $t || n = $n || l = $l || p = $p || f = $f");
 	
-	$result = get_result($q, $t, $n, $l, $p);
+	$result = get_result($q, $t, $n, $l, $p, $o);
 	
 	if (!$f || $f == 'xml') {
 		header('Content-type: application/xml');

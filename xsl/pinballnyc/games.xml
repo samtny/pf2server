@@ -1,0 +1,22 @@
+<games>
+	<game ipdb="2524">
+		<photos>
+			<photo href="http://www.pinballnyc.com/wp-content/uploads/2010/10/Terminator-2_0006_Detail-2.jpg" />
+			<photo href="http://www.pinballnyc.com/wp-content/uploads/2010/10/Terminator-2-Backglass.jpg" />
+		</photos>
+		<instructions>
+			<instruction>SKILL SHOT: Pull trigger to hit moving target light.</instruction>
+			<instruction>...</instruction>
+		</instructions>
+	</game>
+	<game ipdb="4674">
+		<photos>
+			<photo href="http://www.pinballnyc.com/wp-content/uploads/2010/10/Simpsons-Pinball-Party_0004_Lower-Playfield.jpg" />
+			<photo href="http://www.pinballnyc.com/wp-content/uploads/2010/10/Simpson-Pinball-Party-Backglass-374x276.jpg" />
+		</photos>
+		<instructions>
+			<instruction>OBJECT: Help the citizens of Springfield party like there's no tomorrow!</instruction>
+			<instruction>...</instruction>
+		</instructions>
+	</game>
+</games>

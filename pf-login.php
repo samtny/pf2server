@@ -35,7 +35,10 @@ if (!$num) {
 	$_SESSION['user'] = $_POST['user'];
 	$_SESSION['pass'] = $_POST['pass'];
 	
-	echo "<a href='pf-mgmt.php'>Managment</a>";
+	//echo "<a href='pf-mgmt.php'>Managment</a>";
+	
+	header('Location: pf-mgmt.php');
+	die();
 	
 }
 
