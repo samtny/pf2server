@@ -380,7 +380,12 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 	
 	asort($gamedicten);
 	$result->meta->gamedict->en = $gamedicten;
-	
+	/*
+	$message = new Message();
+	$message->title = "Test message!";
+	$message->body = "This is a test message.  Lorem ipsum is my middle name!  Enjoy & Share - Pinfinder Team";
+	$result->meta->message = $message;
+	*/
 	if ($extended == true) {
 		$result->meta->n = $n;
 		$result->meta->q = $q;
