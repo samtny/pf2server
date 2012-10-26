@@ -3,6 +3,9 @@
 include_once('pf-config.php');
 include_once('pf-token.php');
 
+define ('APNS_CERT_PATH', APNS_CERT_PATH_PROD);
+define ('APNS_CERT_PATH_FREE', APNS_CERT_PATH_FREE_PROD);
+
 define ('APNS_HOST_DEV', 'gateway.sandbox.push.apple.com');
 define ('APNS_HOST_PROD', 'gateway.push.apple.com');
 define ('APNS_PORT', 2195);
@@ -14,8 +17,8 @@ define ('APNS_FEEDBACK_PORT', 2196);
 define ('APNS_SERVICE', "apns");
 define ('APNS_SERVICE_FREE', "apnsfree");
 
-define ('APNS_HOST', APNS_HOST_DEV);
-define ('APNS_FEEDBACK_HOST', APNS_FEEDBACK_HOST_DEV);
+define ('APNS_HOST', APNS_HOST_PROD);
+define ('APNS_FEEDBACK_HOST', APNS_FEEDBACK_HOST_PROD);
 
 function fetch_apns_invalid_tokens() {
 	

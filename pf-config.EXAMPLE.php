@@ -43,10 +43,6 @@ define ('APNS_CERT_PATH_PROD', '/path/to/certificates/cert.prod.pem');
 define ('APNS_CERT_PATH_FREE_DEV', '/path/to/certificates/free.cert.dev.pem');
 define ('APNS_CERT_PATH_FREE_PROD', '/path/to/certifications/free.cert.prod.pem');
 
-// toggle apns dev/prod here;
-define ('APNS_CERT_PATH', APNS_CERT_PATH_DEV);
-define ('APNS_CERT_PATH_FREE', APNS_CERT_PATH_FREE_DEV);
-
 // misc;
 define('PF_GAMEDICT_PATH', '/path/to/gamedict.txt');
 

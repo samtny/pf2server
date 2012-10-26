@@ -37,6 +37,17 @@ if (!$num) {
 	
 	//echo "<a href='pf-mgmt.php'>Managment</a>";
 	
+	// set up session;
+	$result = mysql_query("select s.sessionid from session s inner join user u on s.userid = u.userid where u.username = '$_SESSION[user]' and u.password = '$_SESSION[pass]'");
+	$row = mysql_fetch_assoc($result);
+	$sessionId = $row['sessionid'];
+	if (!$sessionId) {
+		$result = mysql_query("insert into session (userid) select userid from user where username = '$_SESSION[user]' and password = '$_SESSION[pass]'");
+		$sessionId = mysql_insert_id();
+	}
+	
+	setcookie("session", $sessionId, time()+3600*24*365);
+	
 	header('Location: pf-mgmt.php');
 	die();
 	

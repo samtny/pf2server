@@ -15,8 +15,15 @@ function get_untagged_tournaments_limit($limit) {
 	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
 	$db_selected = mysql_select_db(DB_NAME, $link);
 	
-	$sql = "select t.tournamentid, t.name as tournamentName, t.datefrom, t.datethru, t.venueid, t.ifpaid ";
+	$sql = "select t.tournamentid, t.name as tournamentName, t.datefrom, t.datethru, t.venueid, t.ifpaid, ";
+	$sql .= "prior.venueid as priorvenueid ";
 	$sql .= "from tournament t ";
+	
+	$sql .= "left outer join (";
+	$sql .= "select ifpaid, max(datefrom) as datefrom from tournament where venueid is not null group by ifpaid";
+	$sql .= ") prior_max on t.ifpaid = prior_max.ifpaid ";
+	$sql .= "left outer join tournament prior on prior_max.ifpaid = prior.ifpaid and prior_max.datefrom = prior.datefrom ";
+	
 	$sql .= "where t.venueid is null and t.omit = 0 ";
 	$sql .= "order by t.datefrom, t.name ";
 	$sql .= "limit $limit ";
@@ -32,6 +39,7 @@ function get_untagged_tournaments_limit($limit) {
 			$from = $row['datefrom'];
 			$thru = $row['datethru'];
 			$venueid = $row['venueid'];
+			$priorvenueid = $row['priorvenueid'];
 			$ifpaid = $row['ifpaid'];
 			
 			$t = new Tournament();
@@ -40,6 +48,7 @@ function get_untagged_tournaments_limit($limit) {
 			$t->dateFrom = $from;
 			$t->dateThru = $thru;
 			$t->venueId = $venueid;
+			$t->priorVenueId = $priorvenueid;
 			$t->ifpaId = $ifpaid;
 			
 			$tournaments[] = $t;

@@ -12,6 +12,12 @@ include_once('pf-ifpa.php');
 include_once('pf-batch.php');
 ?>
 <?php
+$session = $_COOKIE['session'];
+if (!$session) {
+	header('Location: pf-login.php');
+	die();
+}
+/*
 // mostly from here; http://www.devarticles.com/c/a/MySQL/PHP-MySQL-and-Authentication-101/3/
 if (!$_SESSION['user'] || !$_SESSION['pass']) {
 	header('Location: pf-login.php');
@@ -24,8 +30,11 @@ if (!$_SESSION['user'] || !$_SESSION['pass']) {
 	if (!$num) {
 		header('Location: pf-login.php');
 		die();
+	} else {
+		
 	}
 }
+*/
 ?>
 <?php if ($_POST): ?>
 <?php
@@ -143,11 +152,12 @@ if ($locxml) {
 	
 } else if ($action == "approvecomment") {
 	
+	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+	$db_selected = mysql_select_db(DB_NAME, $link);	
+	
 	$key = stripslashes($_POST["key"]);
 	$sql = "update comment set approved = 1 where commentid = " . mysql_real_escape_string($key);
 	
-	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
-	$db_selected = mysql_select_db(DB_NAME, $link);	
 	$result = mysql_query($sql);
 	
 	if ($result == 1) {
@@ -158,11 +168,12 @@ if ($locxml) {
 	
 } else if ($action == "deletecomment") {
 	
+	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+	$db_selected = mysql_select_db(DB_NAME, $link);	
+	
 	$key = stripslashes($_POST["key"]);
 	$sql = "delete from comment where commentid = " . mysql_real_escape_string($key);
 	
-	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
-	$db_selected = mysql_select_db(DB_NAME, $link);	
 	$result = mysql_query($sql);
 	
 	if ($result == 1) {
@@ -173,11 +184,12 @@ if ($locxml) {
 	
 } else if ($action == "deleteglobalnotification") {
 
+	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+	$db_selected = mysql_select_db(DB_NAME, $link);	
+	
 	$key = stripslashes($_POST["key"]);
 	$sql = "delete from notification where global = 1 and notificationid = " . mysql_real_escape_string($key);
 	
-	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
-	$db_selected = mysql_select_db(DB_NAME, $link);	
 	$result = mysql_query($sql);
 	
 	if ($result == 1) {
@@ -188,11 +200,12 @@ if ($locxml) {
 	
 } else if ($action == "deletevenue") {
 	
+	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+	$db_selected = mysql_select_db(DB_NAME, $link);	
+	
 	$key = stripslashes($_POST["key"]);
 	$sql = "update venue set deleted = 1 where venueid = " . mysql_real_escape_string($key);
 	
-	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
-	$db_selected = mysql_select_db(DB_NAME, $link);	
 	$result = mysql_query($sql);
 	if ($result == 1) {
 		print "<pinfinderapp><status>success</status></pinfinderapp>";
@@ -203,11 +216,12 @@ if ($locxml) {
 	
 } else if ($action == "approveaddresschange") {
 	
+	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+	$db_selected = mysql_select_db(DB_NAME, $link);	
+	
 	$key = stripslashes($_POST["key"]);
 	$sql = "update venue set flag = '0' where venueid = " . mysql_real_escape_string($key);
 	
-	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
-	$db_selected = mysql_select_db(DB_NAME, $link);	
 	$result = mysql_query($sql);
 	if ($result == 1) {
 		print "<pinfinderapp><status>success</status></pinfinderapp>";
@@ -251,11 +265,11 @@ if ($locxml) {
 	
 } else if ($action == "associatetournamentvenue") {
 	
+	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+	$db_selected = mysql_select_db(DB_NAME, $link);	
+	
 	$tournamentid = $_POST["tournamentid"];
 	$venueid = $_POST["venueid"];
-	
-	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
-	$db_selected = mysql_select_db(DB_NAME, $link);
 	
 	$sql = "update tournament set venueid = " . mysql_real_escape_string($venueid) . " where tournamentid = " . mysql_real_escape_string($tournamentid);
 	
@@ -269,10 +283,10 @@ if ($locxml) {
 	
 } else if ($action == "omittournament") {
 	
-	$tournamentid = $_POST["tournamentid"];
-	
 	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
-	$db_selected = mysql_select_db(DB_NAME, $link);
+	$db_selected = mysql_select_db(DB_NAME, $link);	
+	
+	$tournamentid = $_POST["tournamentid"];
 	
 	$sql = "update tournament set omit = 1 where tournamentid = " . mysql_real_escape_string($tournamentid);
 	
@@ -354,6 +368,56 @@ if ($q == "globalnotifications") {
 	$response->status = "success";
 	echo json_encode($response);
 	
+} else if ($q == "stats") {
+	
+	$link = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+	
+	$stats = array();
+	
+	$sql = "select count(*) as total from venue where deleted = 0 and approved = 1 and coordinate is not null ";
+	$result = mysqli_query($link, $sql);
+	if ($result) {
+		if ($row = mysqli_fetch_assoc($result)) {
+			$stats['venues'] = $row['total'];
+		}
+	}
+	
+	$sql = "select count(*) as total from machine ";
+	$result = mysqli_query($link, $sql);
+	if ($result) {
+		if ($row = mysqli_fetch_assoc($result)) {
+			$stats['games'] = $row['total'];
+		}
+	}
+	
+	$sql = "select count(*) as total from user ";
+	$result = mysqli_query($link, $sql);
+	if ($result) {
+		if ($row = mysqli_fetch_assoc($result)) {
+			$stats['users'] = $row['total'];
+		}
+	}
+	
+	$sql = "select count(*) as total from venue where datediff(NOW(), updatedate) between 0 and 30 and deleted = 0 and approved = 1 and coordinate is not null ";
+	$result = mysqli_query($link, $sql);
+	if ($result) {
+		if ($row = mysqli_fetch_assoc($result)) {
+			$stats['u30day'] = $row['total'];
+		}
+	}
+	
+	$sql = "select count(*) as total from venue where datediff(NOW(), createdate) between 0 and 30 and deleted = 0 and approved = 1 and coordinate is not null ";
+	$result = mysqli_query($link, $sql);
+	if ($result) {
+		if ($row = mysqli_fetch_assoc($result)) {
+			$stats['n30day'] = $row['total'];
+		}
+	}
+	
+	$stats['status'] = 'success';
+	
+	echo json_encode($stats);
+	
 }
 
 ?>
@@ -365,6 +429,10 @@ if ($q == "globalnotifications") {
 	<style type="text/css">
 	body {
 		background-color: #dedede;
+	}
+	
+	.header h2 {
+		margin-bottom: 0px;
 	}
 	
 	#container {
@@ -455,11 +523,21 @@ if ($q == "globalnotifications") {
 		.newcomments table label {
 			width: 100%;
 		}
-		
-	.recent ul, .flagged ul, .globalnotify ul, .tournaments ul {
+	
+	.recent ul, .flagged ul, .globalnotify ul, .tournaments ul, .stats ul {
 		list-style: none;
 		padding-left: 0px;
 	}
+	
+	.stats ul {
+		margin: 0px 0px 0px 0px;
+	}
+	
+		.stats li {
+			display: inline;
+			list-style-type: none;
+			padding-right: 20px;
+		}
 	
 	.bold {
 		font-weight: 600;
@@ -475,7 +553,14 @@ if ($q == "globalnotifications") {
 	<script type="text/javascript" src="./js/pf-mgmt.js"></script>
 	
 	<div class="container">
-		<h2>Pinfinder Managment</h2>
+		<div class="header">
+			<h2>Pinfinder Managment</h2>
+			<div class="stats">
+				<ul>
+
+				</ul>
+			</div>
+		</div>
 		<div class="unapproved">
 			<h3>New Venues:</h3>
 			<table>
