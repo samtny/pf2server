@@ -259,6 +259,44 @@ function save_game_clean_name($gameid, $nameclean) {
 	
 }
 
+function freshen_venue_dm_names() {
+	
+	$link = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+	
+	$sql = "select v.venueid, v.name from venue v where deleted = 0";
+	
+	$result = mysqli_query($link, $sql);
+	
+	if ($result) {
+		while ($row = mysqli_fetch_assoc($result)) {
+			$id = $row['venueid'];
+			$name = $row['name'];
+			$namedm = dm_location_name_string($name);
+			if ($namedm) {
+				save_venue_dm_name($id, $namedm);
+			}
+		}
+		mysqli_free_result($result);
+	} else {
+		trigger_error(mysqli_error());
+	}
+	
+}
+
+function save_venue_dm_name($venueid, $namedm) {
+	
+	$link = mysqli_connect(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+	
+	$sql = "update venue set namedm = '" . mysqli_real_escape_string($link, $namedm) . "' where venueid = $venueid limit 1 ";
+	
+	$result = mysqli_query($link, $sql);
+	
+	if (!$result) {
+		trigger_error(mysqli_error());
+	}
+	
+}
+
 function freshen_venue_clean_names() {
 	
 	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);

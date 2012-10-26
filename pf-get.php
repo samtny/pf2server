@@ -71,7 +71,7 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 	$venueSql .= 	"t.datefrom as tournamentdate ";
 	$venueSql .= "from ( ";
 	
-	$venueSql .= "select v.venueid, v.name as venuename, v.street, v.city, v.state, v.zipcode, v.neighborhood, v.country, v.phone, X(v.coordinate) as latitude, Y(v.coordinate) as longitude, v.url, v.foursquareid, v.flag, v.updatedate as venueupdated, v.createdate as venuecreated, ";
+	$venueSql .= "select v.venueid, v.name as venuename, v.nameclean as venuenameclean, v.namedm as venuenamedm, v.street, v.city, v.state, v.zipcode, v.neighborhood, v.country, v.phone, X(v.coordinate) as latitude, Y(v.coordinate) as longitude, v.url, v.foursquareid, v.flag, v.updatedate as venueupdated, v.createdate as venuecreated, ";
 	if ($nlat && $nlon && $nlat != null && $nlon != null) {
 		$venueSql .= "sqrt(($nlat - X(v.coordinate)) * ($nlat - X(v.coordinate)) + ($nlon - Y(v.coordinate)) * ($nlon - Y(v.coordinate))) as distance ";
 	} else {
@@ -95,7 +95,10 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 				$venueSql .= "and v.venueid = " . mysql_real_escape_string($q) . " ";			} else {				$venueSql .= "and 1 = 0 ";			}
 		} else if ($t == "venue") {
 			$qclean = clean_location_name_string($q);
-			$venueSql .= "and (v.name like '%" . mysql_real_escape_string($q) . "%' or v.nameclean like '%" . mysql_real_escape_string($qclean) . "%') ";		
+			$qdm = dm_location_name_string($q);
+			$venueSql .= "and (v.name like '%" . mysql_real_escape_string($q) . "%' " . 
+								"or v.nameclean like '%" . mysql_real_escape_string($qclean) . "%' " . 
+								"or v.namedm like '" . mysql_real_escape_string($qdm) . "%') ";		
 		} else if ($t == "game") {
 			$qclean = clean_game_name_string($q);
 			$venueSql .= "and v.venueid in (select v.venueid from venue v inner join machine m on v.venueid = m.venueid inner join game g on m.gameid = g.gameid where (g.abbreviation = '" . mysql_real_escape_string($q) . "' or g.name like '%" . mysql_real_escape_string($q) . "%' or g.nameclean like '%" . mysql_real_escape_string($qclean) . "%')) ";
@@ -169,6 +172,14 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 			$venueOrder = "venueupdated desc, v.venueid";
 		} else if ($t == "mgmt" && $q == "flagged") {
 			$venueOrder = "venueupdated desc, v.venueid";
+		} else if ($t == "venue" && $q) {
+			$qclean = clean_location_name_string($q);
+			$qdm = dm_location_name_string($q);
+			$venueOrder = "case when venuenameclean = '" . mysql_real_escape_string($qclean) . "' then 10 " .
+								"when venuenameclean like '" . mysql_real_escape_string($qclean) . "%' then 15 " .
+								"when venuenamedm like '" . mysql_real_escape_string($qdm) . "%' then 20 " .
+								"when venuenameclean like '%" . mysql_real_escape_string($qclean) . "%' then 30 " .
+								"else 100 end, distance, v.venueid";
 		}
 	}
 	$venueSql .= "order by $venueOrder ";

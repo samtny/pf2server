@@ -223,11 +223,13 @@ function insert_venue($name, $street, $city, $state, $zipcode, $phone, $url, $us
 	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
 	$db_selected = mysql_select_db(DB_NAME, $link);
 	
-	$sql = "insert into venue (name, nameclean, street, city, state, zipcode, phone, url, updatedate, source, sourceid) values (";
+	$sql = "insert into venue (name, nameclean, namedm, street, city, state, zipcode, phone, url, updatedate, source, sourceid) values (";
 	
 	$sql .= $name != null ? "'" . mysql_real_escape_string($name) . "' " : "null";
 	
 	$sql .= $name != null ? ", '" . mysql_real_escape_string(clean_location_name_string($name)) . "' " : ", null ";
+	
+	$sql .= $name != null ? ", '" . mysql_real_escape_string(dm_location_name_string($name)) . "' " : ", null ";
 	
 	$sql .= $street != null ? ", '" . mysql_real_escape_string($street) . "' " : ", null ";
 	
@@ -271,6 +273,7 @@ function update_venue($id, $name, $street, $city, $state, $zipcode, $lat, $lon, 
 	if ($name) {
 		$sql .= $name != null ? ", name = '" . mysql_real_escape_string($name) . "' " : ", name = null ";
 		$sql .= $name != null ? ", nameclean = '" . mysql_real_escape_string(clean_location_name_string($name)) . "' " : ", cleanname = null ";
+		$sql .= $name != null ? ", namedm = '" . mysql_real_escape_string(dm_location_name_string($name)) . "' " : ", namedm = null ";
 	}
 	
 	if ($street) {

@@ -1,5 +1,22 @@
 <?php
 
+include_once('pf-dm.php');
+
+function dm_location_name_string($original) {
+	
+	$pieces = explode(" ", clean_location_name_string($original));
+	
+	$dms = array();
+	
+	foreach ($pieces as $p) {
+		$dm = double_metaphone($p);
+		$dms[] = $dm['secondary'] ? $dm['primary'] . ':' . $dm['secondary'] : $dm['primary'];
+	}
+	
+	return implode(" ", $dms);
+	
+}
+
 function clean_game_name_string($unclean) {
 
 	$clean = preg_replace("/the /i", "", trim($unclean));
