@@ -127,7 +127,7 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 					$venueSql .= "and (v.name like '%museum%' or v.nameclean like '%museum%') ";
 					break;
 				case "upcomingtournaments":
-					$venueSql .= "and v.venueid in (select t.venueid from tournament t where (DATEDIFF(NOW(), t.datefrom) <=0 or DATEDIFF(NOW(), t.datethru) <=0)) ";
+					$venueSql .= "and v.venueid in (select t.venueid from tournament t where (DATEDIFF(NOW(), t.datefrom) between -10 and 0 or DATEDIFF(NOW(), t.datethru) between -10 and 0)) ";
 					break;
 				default:
 					$venueSql .= "and 1 = 0 ";

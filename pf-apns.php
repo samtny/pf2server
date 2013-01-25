@@ -30,19 +30,23 @@ function fetch_apns_invalid_tokens() {
 	
 	$apns = stream_socket_client('ssl://' . APNS_FEEDBACK_HOST . ':' . APNS_FEEDBACK_PORT, $error, $errorString, 2, STREAM_CLIENT_CONNECT, $streamContext);
 	
-	if (!$error) {
+	if ($apns && !$error) {
 		
 		while (!feof($apns)) {
 			$tuple = fread($apns, 38);
-			echo ($tuple . "\n");
+			if (strlen($tuple)) {
+				$payload = unpack("N1timestamp/n1length/H*devtoken", $tuple);
+				$tokens[] = $payload[2];
+			}
 		}
 		
 		fclose($apns);
 		
 	} else {
 		// TODO: log it
+		echo "error: $errorString";
 	}
-
+	
 	return $tokens;
 	
 }
