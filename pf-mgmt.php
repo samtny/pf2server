@@ -431,24 +431,35 @@ if ($q == "globalnotifications") {
 		background-color: #dedede;
 	}
 	
-	.header h2 {
-		margin-bottom: 0px;
+        .header {
+            width:  1200px;
+        }
+        
+            .header h2 {
+                    margin-bottom: 0px;
+            }
+
+	div.container {
+		
 	}
 	
-	#container {
-		width: 1100px;
-		margin-left: auto;
-		margin-right: auto;
-		border: 1px solid black;
-	}
-	
+        div.content {
+            width: 800px;
+            float: left;
+        }
+        
+        div.sidebar {
+            float: right;
+        }
+        
 	.unapproved table {
-		width: 900px;
+		width: 1200px;
 		table-layout: fixed;
+                overflow: hidden;
 	}
 		
 		.unapproved .update {
-			width: 300px;
+			width: 170px;
 		}
 		
 		.unapproved .name, .unapproved .street, .unapproved .url, .unapproved .latlon {
@@ -470,6 +481,11 @@ if ($q == "globalnotifications") {
 			overflow: hidden;
 		}
 	
+        #map-canvas {
+            height:     250px;
+            display:    none;
+        }
+                
 	.addresschanges table {
 		width: 900px;
 		table-layout: fixed;
@@ -524,7 +540,7 @@ if ($q == "globalnotifications") {
 			width: 100%;
 		}
 	
-	.recent ul, .flagged ul, .globalnotify ul, .tournaments ul, .stats ul {
+	.recent ul, .flagged ul, .globalnotify ul, .tournaments ul, .stats ul, .search ul {
 		list-style: none;
 		padding-left: 0px;
 	}
@@ -554,134 +570,154 @@ if ($q == "globalnotifications") {
 	
 	<div class="container">
 		<div class="header">
-			<h2>Pinfinder Managment</h2>
+			<h2>Pinfinder Management</h2>
 			<div class="stats">
 				<ul>
 
 				</ul>
 			</div>
+                        <div class="unapproved">
+                            <h3>New Venues:</h3>
+                            <table>
+                                    <colgroup>
+                                            <col class="name" />
+                                            <col class="street" />
+                                            <col class="city" />
+                                            <col class="state" />
+                                            <col class="zip" />
+                                            <col class="phone" />
+                                            <col class="url" />
+                                            <col class="latlon" />
+                                            <col class="games" />
+                                            <col class="update" />
+                                    </colgroup>
+                                    <thead>
+                                            <tr>
+                                                    <th>Name</th>
+                                                    <th>Street</th>
+                                                    <th>City</th>
+                                                    <th>State</th>
+                                                    <th>Zip</th>
+                                                    <th>Phone</th>
+                                                    <th>URL</th>
+                                                    <th>LatLon</th>
+                                                    <th>Games</th>
+                                                    <th></th>
+                                            </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                            </table>
+                        </div>
+                        <div class="map">
+                            <div id="map-canvas">
+                                
+                            </div>
+                        </div>
 		</div>
-		<div class="unapproved">
-			<h3>New Venues:</h3>
-			<table>
-				<colgroup>
-					<col class="name" />
-					<col class="street" />
-					<col class="city" />
-					<col class="state" />
-					<col class="zip" />
-					<col class="phone" />
-					<col class="url" />
-					<col class="latlon" />
-					<col class="games" />
-					<col class="update" />
-				</colgroup>
-				<thead>
-					<tr>
-						<th>Name</th>
-						<th>Street</th>
-						<th>City</th>
-						<th>State</th>
-						<th>Zip</th>
-						<th>Phone</th>
-						<th>URL</th>
-						<th>LatLon</th>
-						<th>Games</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					
-				</tbody>
-			</table>
-		</div>
-		<div class="addresschanges">
-			<h3>Address Changed:</h3>
-			<table>
-				<colgroup>
-					<col class="name" />
-					<col class="street" />
-					<col class="city" />
-					<col class="state" />
-					<col class="zip" />
-					<col class="phone" />
-					<col class="url" />
-					<col class="latlon" />
-					<col class="games" />
-					<col class="update" />
-				</colgroup>
-				<thead>
-					<tr>
-						<th>Name</th>
-						<th>Street</th>
-						<th>City</th>
-						<th>State</th>
-						<th>Zip</th>
-						<th>Phone</th>
-						<th>URL</th>
-						<th>LatLon</th>
-						<th>Games</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					
-				</tbody>
-			</table>
-		</div>
-		<div class="newcomments">
-			<h3>New Comments:</h3>
-			<table>
-				<colgroup>
-					<col class="comment" />
-					<col class="venue" />
-					<col class="update" />
-				</colgroup>
-				<thead>
-					<tr>
-						<th>Comment</th>
-						<th>Venue</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					
-				</tbody>
-			</table>
-		</div>
-		<div class="notifications">
-			<h3>Pending Notifications</h3>
-			<input type="button" value="Send Notifications" onclick="sendNotifications(this)" /> 
-		</div>
-		<div class="globalnotify">
-			<h3>Global Notifications</h3>
-			<ul>
-			</ul>
-			Message: <input type="text" class="globalmessage" />
-			Extra: <input type="text" class="globalextra" />
-			<input type="button" value="Add" onclick="addGlobalNotification(this)" />
-		</div>
-		<div class="tournaments">
-			<h3>Upcoming Tournaments</h3>
-			<input type="button" value="Refresh IFPA Tournaments" onclick="refreshIFPATournaments(this)" />
-			<label>Associate Venue:</label><input type="text" class="tourneyvenue"></input>
-			<ul>
-			</ul>
-		</div>
-		<div class="maintenance">
-			<h3>Maintenance</h3>
-			<input type="button" value="Refresh gamedict.txt" onclick="refreshGamedict(this)" />
-		</div>
-		<div class="flagged">
-			<h3>Recently Flagged</h3>
-			<ul>
-			</ul>
-		</div>
-		<div class="recent">
-			<h3>Recent Activity</h3>
-			<ul>
-			</ul>
-		</div>
+                <div class="content">
+                    <div class="addresschanges">
+                            <h3>Address Changed:</h3>
+                            <table>
+                                    <colgroup>
+                                            <col class="name" />
+                                            <col class="street" />
+                                            <col class="city" />
+                                            <col class="state" />
+                                            <col class="zip" />
+                                            <col class="phone" />
+                                            <col class="url" />
+                                            <col class="latlon" />
+                                            <col class="games" />
+                                            <col class="update" />
+                                    </colgroup>
+                                    <thead>
+                                            <tr>
+                                                    <th>Name</th>
+                                                    <th>Street</th>
+                                                    <th>City</th>
+                                                    <th>State</th>
+                                                    <th>Zip</th>
+                                                    <th>Phone</th>
+                                                    <th>URL</th>
+                                                    <th>LatLon</th>
+                                                    <th>Games</th>
+                                                    <th></th>
+                                            </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                            </table>
+                    </div>
+                    <div class="newcomments">
+                            <h3>New Comments:</h3>
+                            <table>
+                                    <colgroup>
+                                            <col class="comment" />
+                                            <col class="venue" />
+                                            <col class="update" />
+                                    </colgroup>
+                                    <thead>
+                                            <tr>
+                                                    <th>Comment</th>
+                                                    <th>Venue</th>
+                                                    <th></th>
+                                            </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
+                            </table>
+                    </div>
+                    <div class="notifications">
+                            <h3>Pending Notifications</h3>
+                            <input type="button" value="Send Notifications" onclick="sendNotifications(this)" /> 
+                    </div>
+                    <div class="globalnotify">
+                            <h3>Global Notifications</h3>
+                            <ul>
+                            </ul>
+                            Message: <input type="text" class="globalmessage" />
+                            Extra: <input type="text" class="globalextra" />
+                            <input type="button" value="Add" onclick="addGlobalNotification(this)" />
+                            <input type="button" value="Set tourney notify" onclick="setTourneyNotify()" />
+                    </div>
+                    <div class="search">
+                        <h3>Search</h3>
+                        Venue: <input type="text" class="searchvenue" />
+                        <input type="button" value="Go" onclick="searchVenue(this)" />
+                        <input type="button" value="Clear" onclick="clearSearch()" />
+                        <ul>
+                        </ul>
+                    </div>
+                    <div class="tournaments">
+                            <h3>Upcoming Tournaments</h3>
+                            <input type="button" value="Refresh IFPA Tournaments" onclick="refreshIFPATournaments(this)" />
+                            <span><label>Associate Venue:</label><input type="text" class="tourneyvenue"></span>
+                            <ul>
+
+                            </ul>
+                    </div>
+                    <div class="maintenance">
+                            <h3>Maintenance</h3>
+                            <input type="button" value="Refresh gamedict.txt" onclick="refreshGamedict(this)" />
+                    </div>
+                    
+                </div>
+                <div class="sidebar">
+                    <div class="recent">
+                            <h3>Recent Activity</h3>
+                            <ul>
+                            </ul>
+                    </div>
+                    <div class="flagged">
+                            <h3>Recently Flagged</h3>
+                            <ul>
+                            </ul>
+                    </div>
+                </div>
 	</div>
 	
 </body>

@@ -9,7 +9,7 @@ function get_user($userid) {
 	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
 	$db_selected = mysql_select_db(DB_NAME);
 	
-	$sql = "select u.userid, u.username, u.password, u.lastname, u.firstname, u.uuid from user u where u.userid = " . mysql_real_escape_string($userid);
+	$sql = "select u.userid, u.username, u.password, u.lastname, u.firstname, u.uuid, UNIX_TIMESTAMP(u.lastnotified) as lastnotified from user u where u.userid = " . mysql_real_escape_string($userid);
 	
 	$result = mysql_query($sql);
 	
@@ -23,6 +23,7 @@ function get_user($userid) {
 		$user->lname = $row["lastname"];
 		$user->fname = $row["firstname"];
 		$user->uuid = $row["uuid"];
+                $user->lastnotified = $row["lastnotified"];
 		
 	} else {
 		trigger_error("sql error getting user");
@@ -71,6 +72,17 @@ function next_dummy_username() {
 	
 	return $dummy;
 	
+}
+
+function touch_user_last_notified($user) {
+    
+    $link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+    $db_selected = mysql_select_db(DB_NAME);
+    
+    $sql = "update user set lastnotified = NOW() where userid = " . mysql_real_escape_string($user->id);
+    
+    $result = mysql_query($sql);
+    
 }
 
 function create_user($username, $password, $lname, $fname) {

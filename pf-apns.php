@@ -2,6 +2,7 @@
 
 include_once('pf-config.php');
 include_once('pf-token.php');
+include_once('pf-user.php');
 
 define ('APNS_CERT_PATH', APNS_CERT_PATH_PROD);
 define ('APNS_CERT_PATH_FREE', APNS_CERT_PATH_FREE_PROD);
@@ -98,30 +99,52 @@ function send_apns_notifications_service($notifications, $service) {
 				$tokens = tokens_for_userid_service($n->touserid, $service);
 			}
 			
+                        //print (json_encode("token count: " . count($tokens)));
+                        
+                        $sent = 0;
+                        $skipped = 0;
+                        
 			foreach ($tokens as $t) {
 				
-				$deviceToken = preg_replace('/\s|<|>/', '', $t->token);
-				
-				// simple format;
-				$apnsMessage = chr(0); // command
-				$apnsMessage .= chr(0) . chr(32); //token length
-				$apnsMessage .= pack('H*', $deviceToken); // token
-				$apnsMessage .= chr(0) . chr(mb_strlen($payload)); // payload length
-				$apnsMessage .= $payload;
-				
-				$result = fwrite($apns, $apnsMessage);
-				
-				if ($result == FALSE) {
-					// attempt to recover from closed socket;
-					$apns = stream_socket_client('ssl://' . APNS_HOST . ':' . APNS_PORT, $error, $errorString, 2, STREAM_CLIENT_CONNECT, $streamContext);
-				}
-				
+                            $user = user_matching_service_token($service, $t->token);
+
+                            if (!$user->lastnotified || strtotime("now") - APNS_USER_THROTTLE > $user->lastnotified) {
+
+                                $deviceToken = preg_replace('/\s|<|>/', '', $t->token);
+
+                                // simple format;
+                                $apnsMessage = chr(0); // command
+                                $apnsMessage .= chr(0) . chr(32); //token length
+                                $apnsMessage .= pack('H*', $deviceToken); // token
+                                $apnsMessage .= chr(0) . chr(mb_strlen($payload)); // payload length
+                                $apnsMessage .= $payload;
+                                
+                                $result = fwrite($apns, $apnsMessage);
+
+                                if ($result == FALSE || !$apns) {
+                                    // attempt to recover from closed socket;
+                                    //$apns = stream_socket_client('ssl://' . APNS_HOST . ':' . APNS_PORT, $error, $errorString, 2, STREAM_CLIENT_CONNECT, $streamContext);
+                                    //print ("$user->uuid - $user->lastnotified");
+                                    //print (" - $deviceToken");
+                                    //print " - CONNECTION SEVERED";
+                                    break;
+                                } else {
+                                    touch_user_last_notified($user);
+                                    $sent++;
+                                }
+                                
+                            } else {
+                                $skipped++;
+                            }
+                            
 			}
+                        
+                        //print "skipped: $skipped \t sent: $sent\n";
 			
 		}
 		
 		fclose($apns);
-		
+                
 	} else {
 		// TODO: log it
 	}

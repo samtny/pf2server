@@ -94,6 +94,12 @@ function userid_for_service_token($service, $token) {
 	
 }
 
+function touch_service_token($service, $token) {
+    
+    
+    
+}
+
 function freshen_user_service_token($userid, $service, $token) {
 	
 	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);

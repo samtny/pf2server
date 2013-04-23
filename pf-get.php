@@ -91,8 +91,12 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 		}
 	}
 	if ($q) {
-		if (!$t || $t == "key") {			if (preg_match('/^[0-9]+$/', $q)) {
-				$venueSql .= "and v.venueid = " . mysql_real_escape_string($q) . " ";			} else {				$venueSql .= "and 1 = 0 ";			}
+		if (!$t || $t == "key") {
+			if (preg_match('/^[0-9]+$/', $q)) {
+				$venueSql .= "and v.venueid = " . mysql_real_escape_string($q) . " ";
+			} else {
+				$venueSql .= "and 1 = 0 ";
+			}
 		} else if ($t == "venue") {
 			$qclean = clean_location_name_string($q);
 			$qdm = dm_location_name_string($q);
