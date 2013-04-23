@@ -28,87 +28,96 @@ function process_request($request) {
 		foreach ($user->tokens as $token) {
 			freshen_user_service_token($userid, $token->service, $token->token);
 		}
+                if ($userid) {
+                    $user = get_user($userid);
+                }
 	}
 	
-	foreach ($request->venues as $venue) {
-		
-		$id = $venue->id;
-		$name = $venue->name;
-		$street = $venue->street;
-		$city = $venue->city;
-		$state = $venue->state;
-		$zipcode = $venue->zipcode;
-		$lat = $venue->lat;
-		$lon = $venue->lon;
-		$phone = $venue->phone;
-		$url = $venue->url;
-		$flag = $venue->flag;
-		
-		if ($id) {
-			update_venue($id, $name, $street, $city, $state, $zipcode, $lat, $lon, $phone, $url, $flag);
-		} else {
-			$id = lookup_venue_id($name, $street, $city, $state);
-		}
-		
-		if (!$id) {
-			$id = insert_venue($name, $street, $city, $state, $zipcode, $phone, $url, $userid);
-		}
-		
-		foreach ($venue->games as $game) {
-			
-			$gid = $game->id;
-			$abbr = $game->abbr;
-			$cond = $game->cond;
-			$price = $game->price;
-			$deleted = $game->deleted;
-			
-			if (!$gid) {
-				$gid = lookup_machine($id, $abbr);
-			}
-			
-			if ($deleted == "1") {
-				if ($gid) {
-					delete_machine($gid);
-				}
-			} else if ($gid) {
-				update_game($gid, $cond, $price);
-			} else {
-				insert_game($id, $abbr, $cond, $price);
-			}
-			
-		}
-		
-		foreach ($venue->comments as $comment) {
-			
-			$cid = $comment->id;
-			$text = $comment->text;
-			
-			if (!$cid) {
-				insert_comment($id, $text);
-			}
-			
-		}
-		
-		$q = $id;
-		$t = "key";
-		$n;
-		$l = 1;
-		$p = "nofilter";
-		$o;
-		$saved = get_venue_result($q, $t, $n, $l, $p, $o);
-		
-		if (count($saved->venues) > 0) {
-			$result->venues[] = $saved->venues[0];
-			$result->meta->gamedict->en = array_merge($result->meta->gamedict->en, $saved->meta->gamedict->en);
-		}
-		
-	}
-	
-	if (count($result->venues) > 0) {
-		$result->status->status = "success";
-	} else {
-		$result->status->status = "error";
-	}
+        if (!($user->banned == true)) {
+            
+            foreach ($request->venues as $venue) {
+
+                    $id = $venue->id;
+                    $name = $venue->name;
+                    $street = $venue->street;
+                    $city = $venue->city;
+                    $state = $venue->state;
+                    $zipcode = $venue->zipcode;
+                    $lat = $venue->lat;
+                    $lon = $venue->lon;
+                    $phone = $venue->phone;
+                    $url = $venue->url;
+                    $flag = $venue->flag;
+
+                    if ($id) {
+                            update_venue($id, $name, $street, $city, $state, $zipcode, $lat, $lon, $phone, $url, $flag);
+                    } else {
+                            $id = lookup_venue_id($name, $street, $city, $state);
+                    }
+
+                    if (!$id) {
+                            $id = insert_venue($name, $street, $city, $state, $zipcode, $phone, $url, $userid);
+                    }
+
+                    foreach ($venue->games as $game) {
+
+                            $gid = $game->id;
+                            $abbr = $game->abbr;
+                            $cond = $game->cond;
+                            $price = $game->price;
+                            $deleted = $game->deleted;
+
+                            if (!$gid) {
+                                    $gid = lookup_machine($id, $abbr);
+                            }
+
+                            if ($deleted == "1") {
+                                    if ($gid) {
+                                            delete_machine($gid);
+                                    }
+                            } else if ($gid) {
+                                    update_game($gid, $cond, $price);
+                            } else {
+                                    insert_game($id, $abbr, $cond, $price);
+                            }
+
+                    }
+
+                    foreach ($venue->comments as $comment) {
+
+                            $cid = $comment->id;
+                            $text = $comment->text;
+
+                            if (!$cid) {
+                                    insert_comment($id, $text);
+                            }
+
+                    }
+
+                    $q = $id;
+                    $t = "key";
+                    $n;
+                    $l = 1;
+                    $p = "nofilter";
+                    $o;
+                    $saved = get_venue_result($q, $t, $n, $l, $p, $o);
+
+                    if (count($saved->venues) > 0) {
+                            $result->venues[] = $saved->venues[0];
+                            $result->meta->gamedict->en = array_merge($result->meta->gamedict->en, $saved->meta->gamedict->en);
+                    }
+
+            }
+
+            if (count($result->venues) > 0) {
+                    $result->status->status = "success";
+            } else {
+                    $result->status->status = "error";
+            }
+            
+        } else {
+            $result->status->status = "denied";
+        }
 	
 	return $result;
 	
