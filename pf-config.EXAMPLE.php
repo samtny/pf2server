@@ -4,6 +4,8 @@
 $path = '/path/to/install/dir';
 set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 
+$GLOBALS['debug'] = false;
+
 // database;
 define('DB_NAME', 'foo');
 define('DB_USER', 'bar');
