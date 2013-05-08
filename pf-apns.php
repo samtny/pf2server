@@ -61,94 +61,98 @@ function send_apns_notifications($notifications) {
 
 function send_apns_notifications_service($notifications, $service) {
 	
-	$link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
-	$db_selected = mysql_select_db(DB_NAME, $link);
-	
-	$streamContext = stream_context_create();
-	
-	if ($service == APNS_SERVICE) {
-		stream_context_set_option($streamContext, 'ssl', 'local_cert', APNS_CERT_PATH);
-		stream_context_set_option($streamContext, 'ssl', 'passphrase', "");
-	} else if ($service == APNS_SERVICE_FREE) {
-		stream_context_set_option($streamContext, 'ssl', 'local_cert', APNS_CERT_PATH_FREE);
-		stream_context_set_option($streamContext, 'ssl', 'passphrase', "");
-	}
-	
-	$apns = stream_socket_client('ssl://' . APNS_HOST . ':' . APNS_PORT, $error, $errorString, 2, STREAM_CLIENT_CONNECT, $streamContext);
-	
-	if (!$error) {
-		
-		foreach ($notifications as $n) {
-			
-			$message = $n->message;
-			$extra = $n->extra;
-			
-			$payload = array();
-			$payload['aps'] = array(
-				'alert' => $message
-			);
-			$payload['queryparams'] = $extra;
-			$payload = json_encode($payload);
-			
-			$tokens;
-			if ($n->global == TRUE) {
-				// get all valid apns tokens;
-				$tokens = tokens_for_service($service);
-			} else {
-				// look up apns token/s for userid
-				$tokens = tokens_for_userid_service($n->touserid, $service);
-			}
-			
-                        //print (json_encode("token count: " . count($tokens)));
-                        
-                        $sent = 0;
-                        $skipped = 0;
-                        
-			foreach ($tokens as $t) {
-				
-                            $user = user_matching_service_token($service, $t->token);
+    $link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+    $db_selected = mysql_select_db(DB_NAME, $link);
 
-                            if (!$user->lastnotified || strtotime("now") - APNS_USER_THROTTLE > $user->lastnotified) {
+    $streamContext = stream_context_create();
 
-                                $deviceToken = preg_replace('/\s|<|>/', '', $t->token);
+    if ($service == APNS_SERVICE) {
+            stream_context_set_option($streamContext, 'ssl', 'local_cert', APNS_CERT_PATH);
+            stream_context_set_option($streamContext, 'ssl', 'passphrase', "");
+    } else if ($service == APNS_SERVICE_FREE) {
+            stream_context_set_option($streamContext, 'ssl', 'local_cert', APNS_CERT_PATH_FREE);
+            stream_context_set_option($streamContext, 'ssl', 'passphrase', "");
+    }
 
-                                // simple format;
-                                $apnsMessage = chr(0); // command
-                                $apnsMessage .= chr(0) . chr(32); //token length
-                                $apnsMessage .= pack('H*', $deviceToken); // token
-                                $apnsMessage .= chr(0) . chr(mb_strlen($payload)); // payload length
-                                $apnsMessage .= $payload;
-                                
-                                $result = fwrite($apns, $apnsMessage);
+    $apns = stream_socket_client('ssl://' . APNS_HOST . ':' . APNS_PORT, $error, $errorString, 2, STREAM_CLIENT_CONNECT, $streamContext);
 
-                                if ($result == FALSE || !$apns) {
-                                    // attempt to recover from closed socket;
-                                    //$apns = stream_socket_client('ssl://' . APNS_HOST . ':' . APNS_PORT, $error, $errorString, 2, STREAM_CLIENT_CONNECT, $streamContext);
-                                    //print ("$user->uuid - $user->lastnotified");
-                                    //print (" - $deviceToken");
-                                    //print " - CONNECTION SEVERED";
-                                    break;
-                                } else {
-                                    touch_user_last_notified($user);
-                                    $sent++;
-                                }
-                                
-                            } else {
-                                $skipped++;
-                            }
-                            
-			}
-                        
-                        //print "skipped: $skipped \t sent: $sent\n";
-			
-		}
-		
-		fclose($apns);
-                
-	} else {
-		// TODO: log it
-	}
-	
+    if (!$error) {
+
+        foreach ($notifications as $n) {
+
+            $message = $n->message;
+            $extra = $n->extra;
+
+            $payload = array();
+            $payload['aps'] = array(
+                    'alert' => $message
+            );
+            $payload['queryparams'] = $extra;
+            $payload = json_encode($payload);
+
+            $tokens;
+            if ($n->global == TRUE) {
+                    // get all valid apns tokens;
+                    $tokens = tokens_for_service($service);
+            } else {
+                    // look up apns token/s for userid
+                    $tokens = tokens_for_userid_service($n->touserid, $service);
+            }
+
+            //print (json_encode("token count: " . count($tokens)));
+
+            $sent = 0;
+            $skipped = 0;
+
+            foreach ($tokens as $t) {
+
+                $user = user_matching_service_token($service, $t->token);
+
+                if (!$user->lastnotified || strtotime("now") - APNS_USER_THROTTLE > $user->lastnotified) {
+
+                    $deviceToken = preg_replace('/\s|<|>/', '', $t->token);
+
+                    // simple format;
+                    $apnsMessage = chr(0); // command
+                    $apnsMessage .= chr(0) . chr(32); //token length
+                    $apnsMessage .= pack('H*', $deviceToken); // token
+                    $apnsMessage .= chr(0) . chr(mb_strlen($payload)); // payload length
+                    $apnsMessage .= $payload;
+
+                    $result = fwrite($apns, $apnsMessage);
+
+                    if ($result == FALSE || !$apns) {
+                        // attempt to recover from closed socket;
+                        //$apns = stream_socket_client('ssl://' . APNS_HOST . ':' . APNS_PORT, $error, $errorString, 2, STREAM_CLIENT_CONNECT, $streamContext);
+                        if ($GLOBALS['debug'] == true) {
+                            print ("$user->uuid - $user->lastnotified");
+                            print (" - $deviceToken");
+                            print " - CONNECTION SEVERED";
+                        }
+                        break;
+                    } else {
+                        touch_user_last_notified($user);
+                        $sent++;
+                    }
+
+                } else {
+                    $skipped++;
+                }
+
+            }
+
+            if ($GLOBALS['debug'] == true) {
+                print "skipped: $skipped \t sent: $sent\n";
+            }
+
+        }
+
+        fclose($apns);
+
+    } else {
+            // TODO: log it
+    }
+
 }
 
 ?>
