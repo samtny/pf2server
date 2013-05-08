@@ -122,14 +122,14 @@ function send_apns_notifications_service($notifications, $service) {
                     $result = fwrite($apns, $apnsMessage);
 
                     if ($result == FALSE || !$apns) {
-                        // attempt to recover from closed socket;
-                        //$apns = stream_socket_client('ssl://' . APNS_HOST . ':' . APNS_PORT, $error, $errorString, 2, STREAM_CLIENT_CONNECT, $streamContext);
                         if ($GLOBALS['debug'] == true) {
                             print ("$user->uuid - $user->lastnotified");
                             print (" - $deviceToken");
                             print " - CONNECTION SEVERED";
                         }
-                        break;
+                        // attempt to recover from closed socket;
+                        usleep(1000000);
+                        $apns = stream_socket_client('ssl://' . APNS_HOST . ':' . APNS_PORT, $error, $errorString, 2, STREAM_CLIENT_CONNECT, $streamContext);
                     } else {
                         touch_user_last_notified($user);
                         $sent++;
