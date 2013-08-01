@@ -52,6 +52,7 @@ define('PF_PRIVATE_DATA_DIR', '/path/to/pinfinder_data_dir');
 
 // query defaults;
 define('PF_VENUES_LIMIT_DEFAULT', 70);
+define('PF_VENUES_LIMIT_LARGE', 700);
 define('PF_GAMENAMES_LIMIT_DEFAULT', 25);
 
 define('PF_SAME_VENUE_MILES', 1.0);

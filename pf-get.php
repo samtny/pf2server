@@ -61,6 +61,9 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 	if (!$l) {
 		$l = PF_VENUES_LIMIT_DEFAULT;
 	}
+	if ($l == PF_VENUES_LIMIT_DEFAULT && $t == 'game') {
+		$l = PF_VENUES_LIMIT_LARGE;
+	}
 	
 	$venueSql =  "select v.*, ";
 	$venueSql .= 	"m.machineid, m.condition, m.price, ";
