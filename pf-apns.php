@@ -94,6 +94,7 @@ function send_apns_notifications_service($notifications, $service) {
                     $tokens = tokens_for_userid_service($n->touserid, $service);
             }
 
+            pf_log('token count: ' . count($tokens));
             //print (json_encode("token count: " . count($tokens)));
 
             $sent = 0;
