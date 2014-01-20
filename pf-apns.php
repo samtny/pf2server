@@ -3,6 +3,7 @@
 include_once('pf-config.php');
 include_once('pf-token.php');
 include_once('pf-user.php');
+include_once('pf-log.php');
 
 define ('APNS_CERT_PATH', APNS_CERT_PATH_PROD);
 define ('APNS_CERT_PATH_FREE', APNS_CERT_PATH_FREE_PROD);
@@ -20,6 +21,8 @@ define ('APNS_SERVICE_FREE', "apnsfree");
 
 define ('APNS_HOST', APNS_HOST_PROD);
 define ('APNS_FEEDBACK_HOST', APNS_FEEDBACK_HOST_PROD);
+
+define ('APNS_TIME_LIMIT', 300);
 
 function fetch_apns_invalid_tokens() {
 	
@@ -52,8 +55,10 @@ function fetch_apns_invalid_tokens() {
 	
 }
 
-function send_apns_notifications($notifications) {
+function send_apns_notifications($notifications, $time_limit = APNS_TIME_LIMIT) {
 	
+  set_time_limit($time_limit);
+
 	send_apns_notifications_service($notifications, APNS_SERVICE);
 	send_apns_notifications_service($notifications, APNS_SERVICE_FREE);
 	
@@ -64,17 +69,7 @@ function send_apns_notifications_service($notifications, $service) {
     $link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
     $db_selected = mysql_select_db(DB_NAME, $link);
 
-    $streamContext = stream_context_create();
-
-    if ($service == APNS_SERVICE) {
-            stream_context_set_option($streamContext, 'ssl', 'local_cert', APNS_CERT_PATH);
-            stream_context_set_option($streamContext, 'ssl', 'passphrase', "");
-    } else if ($service == APNS_SERVICE_FREE) {
-            stream_context_set_option($streamContext, 'ssl', 'local_cert', APNS_CERT_PATH_FREE);
-            stream_context_set_option($streamContext, 'ssl', 'passphrase', "");
-    }
-
-    $apns = stream_socket_client('ssl://' . APNS_HOST . ':' . APNS_PORT, $error, $errorString, 2, STREAM_CLIENT_CONNECT, $streamContext);
+    $apns = _apns_client_create($service, $error, $errorString);
 
     if (!$error) {
 
@@ -127,9 +122,17 @@ function send_apns_notifications_service($notifications, $service) {
                             print (" - $deviceToken");
                             print " - CONNECTION SEVERED";
                         }
+                        pf_log($user->uuid . ' - ' . $user->lastnotified . ' - ' . $deviceToken . ' - CONNECTION SEVERED');
+                        
                         // attempt to recover from closed socket;
                         usleep(1000000);
-                        $apns = stream_socket_client('ssl://' . APNS_HOST . ':' . APNS_PORT, $error, $errorString, 2, STREAM_CLIENT_CONNECT, $streamContext);
+                        $apns = _apns_client_create($service, $error, $errorString);
+                        
+                        if ($error) {
+                          pf_log('Error creating subsequent APNS client: ' . $errorString);
+                          
+                          break;
+                        }
                     } else {
                         touch_user_last_notified($user);
                         $sent++;
@@ -144,15 +147,31 @@ function send_apns_notifications_service($notifications, $service) {
             if ($GLOBALS['debug'] == true) {
                 print "skipped: $skipped \t sent: $sent\n";
             }
+            
+            pf_log('skipped: ' . $skipped . ' sent: ' . $sent);
 
         }
 
         fclose($apns);
 
     } else {
-            // TODO: log it
+            pf_log('Error creating initial APNS client: ' . $errorString);
     }
 
+}
+
+function _apns_client_create($service, &$error, &$errorString) {
+  $streamContext = stream_context_create();
+
+  if ($service == APNS_SERVICE) {
+          stream_context_set_option($streamContext, 'ssl', 'local_cert', APNS_CERT_PATH);
+          stream_context_set_option($streamContext, 'ssl', 'passphrase', "");
+  } else if ($service == APNS_SERVICE_FREE) {
+          stream_context_set_option($streamContext, 'ssl', 'local_cert', APNS_CERT_PATH_FREE);
+          stream_context_set_option($streamContext, 'ssl', 'passphrase', "");
+  }
+  
+  return stream_socket_client('ssl://' . APNS_HOST . ':' . APNS_PORT, $error, $errorString, 2, STREAM_CLIENT_CONNECT, $streamContext);
 }
 
 ?>
