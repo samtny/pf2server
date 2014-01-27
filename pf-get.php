@@ -5,7 +5,7 @@ include_once('pf-class.php');
 include_once('pf-geocode.php');
 include_once('pf-string.php');
 
-function get_result($q, $t, $n, $l, $p, $o) {
+function get_result($q, $t, $n = NULL, $l = PF_VENUES_LIMIT_DEFAULT, $p = NULL, $o = 'date') {
 	if ($t == "gamelist") {
 		return get_gamelist_result($q, $l);
 	} else if ($t == "stats") {
@@ -165,6 +165,7 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 			case "name":
 				$venueOrder = "venuename, v.venueid";
 				break;
+      case "date":
 			default:
 				$venueOrder = "venueupdated desc, v.venueid";
 				break;

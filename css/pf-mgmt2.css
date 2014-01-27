@@ -1,0 +1,7 @@
+body {
+  padding-top: 70px;
+}
+
+.content > div {
+  display: none;
+}
