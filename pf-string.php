@@ -2,6 +2,19 @@
 
 include_once('pf-dm.php');
 
+function string_dm($string) {
+  $dms = array();
+
+  $pieces = explode(" ", $string);
+
+  foreach ($pieces as $p) {
+    $dm = double_metaphone($p);
+    $dms[] = $dm['secondary'] ? $dm['primary'] . ':' . $dm['secondary'] : $dm['primary'];
+  }
+
+  return implode(" ", $dms);
+}
+
 function dm_location_name_string($original) {
 	
 	$pieces = explode(" ", clean_location_name_string($original));

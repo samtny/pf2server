@@ -2,6 +2,15 @@
 
 include_once('pf-config.php');
 
+function user_cull_orphans() {
+  $link = mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+  mysql_select_db(DB_NAME);
+
+  $sql = "delete from user where not exists (select userid from token where user.userid = token.userid)";
+
+  mysql_query($sql);
+}
+
 function get_user($userid) {
 	
 	$user;

@@ -74,7 +74,7 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 	$venueSql .= 	"t.datefrom as tournamentdate ";
 	$venueSql .= "from ( ";
 	
-	$venueSql .= "select v.venueid, v.name as venuename, v.nameclean as venuenameclean, v.namedm as venuenamedm, v.street, v.city, v.state, v.zipcode, v.neighborhood, v.country, v.phone, X(v.coordinate) as latitude, Y(v.coordinate) as longitude, v.url, v.foursquareid, v.flag, v.updatedate as venueupdated, v.createdate as venuecreated, ";
+	$venueSql .= "select v.venueid, v.name as venuename, v.nameclean as venuenameclean, v.namedm as venuenamedm, v.street, v.city, v.state, v.zipcode, v.neighborhood, v.country, v.phone, X(v.coordinate) as latitude, Y(v.coordinate) as longitude, v.url, v.foursquareid, v.flag, v.updatedate as venueupdated, v.createdate as venuecreated, v.source, v.sourceid, ";
 	if ($nlat && $nlon && $nlat != null && $nlon != null) {
 		$venueSql .= "sqrt(($nlat - X(v.coordinate)) * ($nlat - X(v.coordinate)) + ($nlon - Y(v.coordinate)) * ($nlon - Y(v.coordinate))) as distance ";
 	} else {
@@ -227,6 +227,11 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 				$venue->name = $vrow["venuename"];
 				$venue->lat = (float)$vrow["latitude"];
 				$venue->lon = (float)$vrow["longitude"];
+
+        if ($t == 'mgmt') {
+          $venue->source = $vrow['source'];
+          $venue->sourceid = $vrow['sourceid'];
+        }
 				
 				if ($minimal == false) {
 					

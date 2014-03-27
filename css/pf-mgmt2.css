@@ -5,3 +5,12 @@ body {
 .content > div {
   display: none;
 }
+
+#map-canvas {
+  height: 250px;
+  display: none;
+}
+
+.link {
+  cursor: pointer;
+}
