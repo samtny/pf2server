@@ -11,6 +11,8 @@ if (!String.prototype.format) {
 }
 
 (function ($) {
+  var admin_url = 'pf-admin.php',
+    search_url = 'pf';
 
   $(document).ready(function () {
 
@@ -81,43 +83,59 @@ if (!String.prototype.format) {
       self.extra = ko.observable(data.extra);
       self.touserid = ko.observable(data.touserid);
       self.userStats = ko.observable(data.userStats);
+      self.saved = ko.observable(false);
+
+      self.save = function () {
+        $.ajax({
+          url: admin_url,
+          type: 'POST',
+          data: {
+            op: 'saveNotification',
+            data: ko.toJSON(self)
+          }
+        });
+      };
     };
 
-    var NotificationListViewModel = function() {
+    var SearchVenueViewModel = function() {
       var self = this;
 
-      self.notifications = ko.observableArray();
+      self.name = ko.observable();
+      self.results = ko.observableArray();
 
+      self.submit = function() {
+        self.results([]);
 
-    };
-
-    var SearchViewModel = function() {
-      var self = this;
-
-      self.venueName = ko.observable();
+        $.ajax({
+          url: search_url + '?f=json&t=venue&q=' + self.name()
+        }).done(function (data) {
+          if (data.venues !== undefined) {
+            for (var i = 0; i < data.venues.length; i++) {
+              self.results.push(new VenueViewModel(data.venues[i]));
+            }
+          }
+        });
+      };
     };
 
     var PinfinderManagementViewModel = function () {
       var self = this,
-        admin_url = 'pf-admin.php',
-        search_url = 'pf',
         geocoder = new google.maps.Geocoder(),
         approvedMsg = 'The venue \'{0}\' you added was approved!  Thank you!  -The Pinfinder Team',
         map;
 
       self.title = 'Pinfinder Management';
       self.stats = ko.observable();
-      self.unapproved = ko.observableArray();
-      self.comments = ko.observableArray();
+      self.unapproved_venues = ko.observableArray();
+      self.unapproved_comments = ko.observableArray();
       self.venue = ko.observable();
       self.game = ko.observable();
       self.manufacturers = ko.observable();
-      self.notificationList = new NotificationListViewModel();
       self.notification = ko.observable();
-      self.search = new SearchViewModel();
+      self.search_venue = new SearchVenueViewModel();
       self.searchVenueResults = ko.observableArray();
       self.user = ko.observable();
-      self.notifications = ko.observableArray();
+      self.notifications_pending = ko.observableArray();
 
       self.venueExtra = function (venue) {
         var addressLong = ' - ';
@@ -148,17 +166,15 @@ if (!String.prototype.format) {
       };
 
       self.getUnapproved = function() {
-        self.unapproved([]);
+        self.unapproved_venues([]);
 
         $.ajax({
           url: admin_url + '?q=unapproved'
         })
         .done(function (data) {
-          if (data.venues !== undefined) {
-            for (var i = 0; i < 10; i++) {
-              self.unapproved.push(new VenueViewModel(data.venues[i]));
-            }
-          }
+          _.each(data.venues, function (venue) {
+            self.unapproved_venues.push(new VenueViewModel(venue));
+          });
         });
       };
 
@@ -189,7 +205,7 @@ if (!String.prototype.format) {
           self.geocodeVenue();
         }
 
-        location.hash = '#/venue';
+        location.hash = '#/venue_edit';
       };
 
       self.saveVenue = function() {
@@ -280,19 +296,18 @@ if (!String.prototype.format) {
         self.getUser(self.notification().touserid(), self.editUser)
       };
 
-      self.getNotifications = function () {
-        self.notifications([]);
+
+      self.getNotificationsPending = function () {
+        self.notifications_pending([]);
 
         $.ajax({
           url: admin_url + '?q=notifications'
         })
           .done(function (data) {
-            console.log('data', data);
-            if (data.notifications !== undefined) {
-              for (var i = 0; i < data.notifications.length; i++) {
-                self.notifications.push(new NotificationViewModel(data.notifications[i]));
-              }
-            }
+            console.log('notifications', data);
+            _.each(data.notifications, function (notification) {
+              self.notifications_pending.push(new NotificationViewModel(notification));
+            });
           });
       };
 
@@ -323,38 +338,9 @@ if (!String.prototype.format) {
             console.log('data', data);
             if (data.success === true) {
               self.notification(null);
-              self.getNotifications();
+              self.getNotificationsPending();
               $('#alert .modal-body').text('Server Response: ' + data.message);
               $('#alert').modal();
-            } else {
-              $('#alert .modal-body').text('Server Response: ' + data.message);
-              $('#alert').modal();
-            }
-          });
-      };
-
-      self.saveNotification = function(notification, quiet) {
-        var payload = {
-          op: 'saveNotification',
-          data: ko.toJSON(notification)
-        };
-
-        $.ajax({
-          url: admin_url,
-          type: 'POST',
-          data: payload
-        })
-          .done(function (data) {
-            console.log('data', data);
-            if (data.success === true) {
-              self.notification(null);
-              self.getNotifications();
-              if (!quiet) {
-                $('#alert .modal-body').text('Server Response: ' + data.message);
-                $('#alert').modal();
-              } else {
-                console.log('saveNotification', data);
-              }
             } else {
               $('#alert .modal-body').text('Server Response: ' + data.message);
               $('#alert').modal();
@@ -370,7 +356,7 @@ if (!String.prototype.format) {
 
             console.log('data', data);
 
-            self.getNotifications();
+            self.getNotificationsPending();
             $('#alert .modal-body').text('Server Response: ' + data.message);
             $('#alert').modal();
           });
@@ -382,29 +368,9 @@ if (!String.prototype.format) {
         })
           .done(function (data) {
             console.log('data', data);
-            self.getNotifications();
+            self.getNotificationsPending();
             $('#alert .modal-body').text('Server Response: ' + data.message);
             $('#alert').modal();
-          });
-      };
-
-      self.searchSubmit = function() {
-        var url = search_url + '?f=json&';
-
-        if (self.search.venueName().length > 0) {
-          url += 't=venue&q=' + self.search.venueName();
-        }
-
-        self.searchVenueResults([]);
-
-        $.ajax({
-          url: url
-        })
-          .done(function (data) {
-            console.log('searchResponse', data);
-            for (var i = 0; i < data.venues.length; i++) {
-              self.searchVenueResults.push(new VenueViewModel(data.venues[i]));
-            }
           });
       };
 
@@ -448,9 +414,9 @@ if (!String.prototype.format) {
           self.setTitle('Home');
         }).enter(clearPanel);
 
-        Path.map('#/venue').to(function() {
+        Path.map('#/venue_edit').to(function() {
           $('.content > div').removeClass('active');
-          $('#venue').addClass('active').fadeIn('fast', function() {
+          $('#venue_edit').addClass('active').fadeIn('fast', function() {
             google.maps.event.trigger(map, 'resize');
           });
           self.setTitle(self.venue().name());
@@ -464,14 +430,14 @@ if (!String.prototype.format) {
 
         Path.map('#/user').to(function() {
           $('.content > div').removeClass('active');
-          $('#user').addClass('active').fadeIn();
+          $('#user_edit').addClass('active').fadeIn();
           self.setTitle('User Edit');
         }).enter(clearPanel);
 
         Path.map('#/game/new').to(function() {
           self.game(new GameViewModel());
           $('.content > div').removeClass('active');
-          $('#game').addClass('active').fadeIn();
+          $('#game_edit').addClass('active').fadeIn();
           self.setTitle('Add Game');
         }).enter(clearPanel);
 
@@ -487,7 +453,7 @@ if (!String.prototype.format) {
 
         self.getStats();
         self.getUnapproved();
-        self.getNotifications();
+        self.getNotificationsPending();
         self.getOptions();
 
         location.hash= '#/home';
