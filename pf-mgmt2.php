@@ -83,11 +83,19 @@
       </div>
     </script>
 
+    <!-- unapproved_venues -->
+    <script type="text/html" id="unapproved_venues">
+      <!-- ko if: unapproved_venues -->
+      <h4>Approve</h4>
+      <!-- ko template: { name: 'venue_list', data: unapproved_venues } --><!-- /ko -->
+      <!-- /ko -->
+    </script>
+
     <!-- venue_list -->
     <script type="text/html" id="venue_list">
       <div class="form-group">
-        <div class="list-group" data-bind="foreach: $data">
-          <a class="list-group-item link" data-bind="click: $root.editVenue"><span class="h4" data-bind="text: name"></span><small data-bind="text: addressLong()"></small></a>
+        <div class="list-group" data-bind="foreach: venues">
+          <a class="list-group-item link" data-bind="click: $parent.edit"><span class="h4" data-bind="text: name"></span><small data-bind="text: addressLong()"></small></a>
         </div>
       </div>
     </script>
@@ -101,12 +109,6 @@
       </div>
     </script>
 
-    <!-- unapproved_venues -->
-    <script type="text/html" id="unapproved_venues">
-      <h4 data-bind="visible: unapproved_venues().length">Approve</h4>
-      <!-- ko template: { if: unapproved_venues().length, name: 'venue_list', data: unapproved_venues } --><!-- /ko -->
-    </script>
-
     <!-- unapproved_comments -->
     <script type="text/html" id="unapproved_comments">
       <h4 data-bind="visible: unapproved_comments().length">Comments</h4>
@@ -115,20 +117,24 @@
 
     <!-- notifications_pending -->
     <script type="text/html" id="notifications_pending">
-      <h4 data-bind="visible: notifications_pending().length">Pending Notifications</h4>
-      <!-- ko template: { if: notifications_pending().length, name: 'notification_list', data: notifications_pending } --><!-- /ko -->
+      <!-- ko if: notifications_pending -->
+      <!-- ko if: !notification() -->
+      <h4>Pending Notifications</h4>
+      <!-- ko template: { name: 'notification_list', data: notifications_pending } --><!-- /ko -->
+      <!-- /ko -->
+      <!-- /ko -->
     </script>
 
     <!-- notification list -->
     <script type="text/html" id="notification_list">
       <div class="form-group">
-        <div class="list-group" data-bind="foreach: $data">
+        <div class="list-group" data-bind="foreach: notifications">
           <a class="list-group-item link" data-bind="click: $parent.edit"><span class="h4" data-bind="text: text"></span></a>
         </div>
 
-        <button type="button" class="btn btn-default" data-bind="click: new, visible: !notification_edit()">New</button>
-        <button type="button" class="btn btn-default" data-bind="click: send, visible: !notification_edit()">Send All</button>
-        <button type="button" class="btn btn-default" data-bind="click: clean, visible: !notification_edit()">Clean</button>
+        <button type="button" class="btn btn-default" data-bind="click: $root.newNotification">New</button>
+        <button type="button" class="btn btn-default" data-bind="click: $root.sendNotifications">Send All</button>
+        <button type="button" class="btn btn-default" data-bind="click: $root.cleanNotifications">Clean</button>
       </div>
     </script>
 
@@ -152,7 +158,7 @@
           <label for="notificationUser">User Id</label>
           <input type="text" class="form-control" id="notificationUser" placeholder="User Id" data-bind="value: touserid">
         </div>
-        <button type="button" class="btn btn-default" data-bind="click: save">Save</button>
+        <button type="button" class="btn btn-default" data-bind="click: $parent.saveNotification">Save</button>
         <button type="button" class="btn btn-default" data-bind="click: $parent.cancelNotification">Cancel</button>
         <button type="button" class="btn btn-default pull-right" data-bind="click: $parent.deleteNotification">Delete</button>
       </div>
@@ -231,11 +237,9 @@
         <div class="form-group">
           <button type="button" class="btn btn-default" data-bind="click: submit">Search</button>
         </div>
-        <!-- ko template: { if: results().length, name: 'venue_list', data: results } --><!-- /ko -->
+        <!-- ko template: { if: venues(), name: 'venue_list', data: venues } --><!-- /ko -->
       </div>
     </script>
-
-
 
     <!-- user -->
     <script type="text/html" id="user">

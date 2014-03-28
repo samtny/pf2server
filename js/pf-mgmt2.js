@@ -2,24 +2,19 @@ if (!String.prototype.format) {
   String.prototype.format = function() {
     var args = arguments;
     return this.replace(/{(\d+)}/g, function(match, number) {
-      return typeof args[number] != 'undefined'
-        ? args[number]
-        : match
-        ;
+      return typeof args[number] != 'undefined' ? args[number] : match;
     });
   };
 }
 
 (function ($) {
   var admin_url = 'pf-admin.php',
-    search_url = 'pf';
-
-  $(document).ready(function () {
-
-    var clearPanel = function () {
+    search_url = 'pf',
+    clearPanel = function () {
       $('.content .active').hide();
     };
 
+  $(document).ready(function () {
     var GameViewModel = function () {
       var self = this;
 
@@ -55,8 +50,47 @@ if (!String.prototype.format) {
 
         return addressLong;
       };
+    };
 
-      console.log(ko.toJS(self));
+    var VenueListViewModel = function(venues) {
+      var self = this;
+
+      self.venues = ko.observableArray();
+      self.selected = ko.observable();
+
+      self.edit = function (venue) {
+        self.selected(venue);
+      };
+
+      _.each(venues, function (venue) {
+        self.venues.push(new VenueViewModel(venue));
+      });
+    };
+
+    var NotificationViewModel = function(data) {
+      var self = this;
+
+      self.id = data.id;
+      self.text = ko.observable(data.text);
+      self.global = ko.observable(data.global == '1');
+      self.extra = ko.observable(data.extra);
+      self.touserid = ko.observable(data.touserid);
+      self.userStats = ko.observable(data.userStats);
+    };
+
+    var NotificationListViewModel = function(notifications) {
+      var self = this;
+
+      self.notifications = ko.observableArray();
+      self.selected = ko.observable();
+
+      self.edit = function (notification) {
+        self.selected(notification);
+      };
+
+      _.each(notifications, function (notification) {
+        self.notifications.push(new NotificationViewModel(notification));
+      });
     };
 
     var UserViewModel = function (data) {
@@ -74,46 +108,23 @@ if (!String.prototype.format) {
       }
     };
 
-    var NotificationViewModel = function(data) {
-      var self = this;
-
-      self.id = data.id;
-      self.text = ko.observable(data.text);
-      self.global = ko.observable(data.global == '1');
-      self.extra = ko.observable(data.extra);
-      self.touserid = ko.observable(data.touserid);
-      self.userStats = ko.observable(data.userStats);
-      self.saved = ko.observable(false);
-
-      self.save = function () {
-        $.ajax({
-          url: admin_url,
-          type: 'POST',
-          data: {
-            op: 'saveNotification',
-            data: ko.toJSON(self)
-          }
-        });
-      };
-    };
-
     var SearchVenueViewModel = function() {
       var self = this;
 
       self.name = ko.observable();
-      self.results = ko.observableArray();
+      self.venues = ko.observable();
+      self.selected = ko.observable();
 
       self.submit = function() {
-        self.results([]);
+        self.venues(null);
 
         $.ajax({
           url: search_url + '?f=json&t=venue&q=' + self.name()
         }).done(function (data) {
-          if (data.venues !== undefined) {
-            for (var i = 0; i < data.venues.length; i++) {
-              self.results.push(new VenueViewModel(data.venues[i]));
-            }
-          }
+          self.venues(new VenueListViewModel(data.venues));
+          self.venues().selected.subscribe(function (venue) {
+            self.selected(venue);
+          })
         });
       };
     };
@@ -126,16 +137,16 @@ if (!String.prototype.format) {
 
       self.title = 'Pinfinder Management';
       self.stats = ko.observable();
-      self.unapproved_venues = ko.observableArray();
+      self.unapproved_venues = ko.observable();
       self.unapproved_comments = ko.observableArray();
       self.venue = ko.observable();
       self.game = ko.observable();
       self.manufacturers = ko.observable();
       self.notification = ko.observable();
-      self.search_venue = new SearchVenueViewModel();
+      self.search_venue = ko.observable();
       self.searchVenueResults = ko.observableArray();
       self.user = ko.observable();
-      self.notifications_pending = ko.observableArray();
+      self.notifications_pending = ko.observable();
 
       self.venueExtra = function (venue) {
         var addressLong = ' - ';
@@ -166,16 +177,23 @@ if (!String.prototype.format) {
       };
 
       self.getUnapproved = function() {
-        self.unapproved_venues([]);
-
         $.ajax({
           url: admin_url + '?q=unapproved'
         })
-        .done(function (data) {
-          _.each(data.venues, function (venue) {
-            self.unapproved_venues.push(new VenueViewModel(venue));
+          .done(function (data) {
+            self.unapproved_venues(new VenueListViewModel(data.venues));
+            self.unapproved_venues().selected.subscribe(self.editVenue);
           });
-        });
+      };
+
+      self.getNotificationsPending = function () {
+        $.ajax({
+          url: admin_url + '?q=notifications'
+        })
+          .done(function (data) {
+            self.notifications_pending(new NotificationListViewModel(data.notifications));
+            self.notifications_pending().selected.subscribe(self.editNotification);
+          });
       };
 
       self.updateMap = function() {
@@ -199,13 +217,9 @@ if (!String.prototype.format) {
       self.editVenue = function(venue) {
         self.venue(venue);
 
-        if (typeof self.venue().lat() !== 'undefined') {
-          self.updateMap();
-        } else {
-          self.geocodeVenue();
-        }
-
         location.hash = '#/venue_edit';
+
+        _.defer(self.geocodeVenue);
       };
 
       self.saveVenue = function() {
@@ -222,16 +236,23 @@ if (!String.prototype.format) {
           .done(function (data) {
             if (self.venue().approved() === true) {
               if (self.venue().source() == 'user') {
-                self.saveNotification(new NotificationViewModel({
+                var notification = new NotificationViewModel({
                   text: approvedMsg.format(self.venue().name()),
                   global: 'false',
                   extra: 'q=' + self.venue().id,
                   touserid: self.venue().sourceid
-                }), true);
+                });
+
+                $.ajax({
+                  url: admin_url,
+                  type: 'POST',
+                  data: {
+                    op: 'saveNotification',
+                    data: ko.toJSON(notification)
+                  }
+                });
               }
 
-              self.getStats();
-              self.getUnapproved();
               location.hash = '#/home';
             }
             $('#alert .modal-body').text('Server Response: ' + data.message);
@@ -262,17 +283,19 @@ if (!String.prototype.format) {
       };
 
       self.geocodeVenue = function() {
-        var address = self.venue().street() + ' ' + self.venue().city() + ' ' + self.venue().state();
+        if (self.venue() !== undefined) {
+          var address = self.venue().street() + ' ' + self.venue().city() + ' ' + self.venue().state();
 
-        geocoder.geocode( { 'address': address }, function (results, status) {
-          if (status == google.maps.GeocoderStatus.OK) {
+          geocoder.geocode( { 'address': address }, function (results, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
 
-            self.venue().lat(results[0].geometry.location.lat());
-            self.venue().lon(results[0].geometry.location.lng());
+              self.venue().lat(results[0].geometry.location.lat());
+              self.venue().lon(results[0].geometry.location.lng());
 
-            self.updateMap();
-          }
-        });
+              self.updateMap();
+            }
+          });
+        }
       };
 
       self.getUser = function (userid, callback) {
@@ -296,23 +319,25 @@ if (!String.prototype.format) {
         self.getUser(self.notification().touserid(), self.editUser)
       };
 
-
-      self.getNotificationsPending = function () {
-        self.notifications_pending([]);
-
-        $.ajax({
-          url: admin_url + '?q=notifications'
-        })
-          .done(function (data) {
-            console.log('notifications', data);
-            _.each(data.notifications, function (notification) {
-              self.notifications_pending.push(new NotificationViewModel(notification));
-            });
-          });
+      self.newNotification = function () {
+        self.notification(new NotificationViewModel({ global: true }));
       };
 
-      self.newNotification = function() {
-        self.notification(new NotificationViewModel({ global: true }));
+      self.saveNotification = function () {
+        $.ajax({
+          url: admin_url,
+          type: 'POST',
+          data: {
+            op: 'saveNotification',
+            data: ko.toJSON(self.notification())
+          }
+        })
+          .done(function (data) {
+            $('#alert .modal-body').text('Server Response: ' + data.message);
+            $('#alert').modal();
+            self.notification(null);
+            self.getNotificationsPending();
+          });
       };
 
       self.cancelNotification = function () {
@@ -412,20 +437,27 @@ if (!String.prototype.format) {
           $('.content > div').removeClass('active');
           $('#home').addClass('active').fadeIn();
           self.setTitle('Home');
+          self.getStats();
+          self.getUnapproved();
         }).enter(clearPanel);
 
         Path.map('#/venue_edit').to(function() {
-          $('.content > div').removeClass('active');
-          $('#venue_edit').addClass('active').fadeIn('fast', function() {
-            google.maps.event.trigger(map, 'resize');
-          });
-          self.setTitle(self.venue().name());
+          if (self.venue() == undefined) {
+            location.hash = '#/home';
+          } else {
+            $('.content > div').removeClass('active');
+            $('#venue_edit').addClass('active').fadeIn('fast', function() {
+              google.maps.event.trigger(map, 'resize');
+            });
+            self.setTitle(self.venue().name());
+          }
         }).enter(clearPanel);
 
         Path.map('#/notifications').to(function() {
           $('.content > div').removeClass('active');
           $('#notifications').addClass('active').fadeIn();
           self.setTitle('Notifications');
+          self.getNotificationsPending();
         }).enter(clearPanel);
 
         Path.map('#/user').to(function() {
@@ -445,18 +477,15 @@ if (!String.prototype.format) {
           $('.content > div').removeClass('active');
           $('#search').addClass('active').fadeIn();
           self.setTitle('Search');
+          self.search_venue = new SearchVenueViewModel();
+          self.search_venue.selected.subscribe(self.editVenue);
         }).enter(clearPanel);
 
         Path.root('#/home');
 
         Path.listen();
 
-        self.getStats();
-        self.getUnapproved();
-        self.getNotificationsPending();
         self.getOptions();
-
-        location.hash= '#/home';
       };
 
       init();
