@@ -78,6 +78,12 @@ else {
           print json_encode($response);
 
           break;
+        case 'unapproved_comments':
+          $response = get_result('unapprovedcomment', 'mgmt');
+          header('Content-type: application/json');
+          print json_encode($response);
+
+          break;
         case 'options':
           $response = get_options();
           header('Content-type: application/json');

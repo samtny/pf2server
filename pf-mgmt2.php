@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>Pinfinder Management Interface</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/bootstrap-theme.min.css" rel="stylesheet">
     <link href="css/pf-mgmt2.css" rel="stylesheet">
@@ -16,10 +16,11 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#/home" data-bind="text: title"></a>
+          <a class="navbar-brand" href="#/home">Pinfinder Management</a>
         </div>
         <div class="collapse navbar-collapse" id="pf-navbar-collapse">
           <ul class="nav navbar-nav">
+            <li><a href="#/find">Find</a></li>
             <li><a href="#/notifications">Notifications</a></li>
             <li><a href="#/search">Search</a></li>
             <li><a href="#/game/new">Add Game</a></li>
@@ -31,10 +32,11 @@
       <div class="row">
         <div class="col-xs-12">
           <div class="content">
-            <div class="form-group" id="home">
+            <div id="home">
               <!-- ko template: 'stats' --><!-- /ko -->
               <!-- ko template: 'unapproved_venues' --><!-- /ko -->
               <!-- ko template: 'unapproved_comments' --><!-- /ko -->
+              <!-- ko template: 'recent_venues' --><!-- /ko -->
             </div>
 
             <div class="form-group" id="search">
@@ -64,19 +66,24 @@
         <div class="panel-body">
           <div class="row" data-bind="with: stats">
             <div class="col-xs-6 col-sm-2">
-              Venues: <span data-bind="text: parseInt(venues).toLocaleString()"></span>
+              <label>Venues:</label>
+              <span data-bind="text: parseInt(venues).toLocaleString()"></span>
             </div>
             <div class="col-xs-6 col-sm-2">
-              New: <span data-bind="text: parseInt(n30day).toLocaleString()"></span>
+              <label>New:</label>
+              <span data-bind="text: parseInt(n30day).toLocaleString()"></span>
             </div>
             <div class="col-xs-6 col-sm-2">
-              Updated: <span data-bind="text: parseInt(u30day).toLocaleString()"></span>
+              <label>Updated:</label>
+              <span data-bind="text: parseInt(u30day).toLocaleString()"></span>
             </div>
             <div class="col-xs-6 col-sm-2">
-              Users: <span data-bind="text: parseInt(users).toLocaleString()"></span>
+              <label>Users:</label>
+              <span data-bind="text: parseInt(users).toLocaleString()"></span>
             </div>
             <div class="col-xs-6 col-sm-2">
-              Machines: <span data-bind="text: parseInt(machines).toLocaleString()"></span>
+              <label>Machines:</label>
+              <span data-bind="text: parseInt(machines).toLocaleString()"></span>
             </div>
           </div>
         </div>
@@ -85,17 +92,25 @@
 
     <!-- unapproved_venues -->
     <script type="text/html" id="unapproved_venues">
-      <!-- ko if: unapproved_venues -->
+      <!-- ko if: unapproved_venues().length -->
       <h4>Approve</h4>
       <!-- ko template: { name: 'venue_list', data: unapproved_venues } --><!-- /ko -->
+      <!-- /ko -->
+    </script>
+
+    <!-- recent_venues -->
+    <script type="text/html" id="recent_venues">
+      <!-- ko if: recent_venues().length -->
+      <h4>Recent</h4>
+      <!-- ko template: { name: 'venue_list', data: recent_venues } --><!-- /ko -->
       <!-- /ko -->
     </script>
 
     <!-- venue_list -->
     <script type="text/html" id="venue_list">
       <div class="form-group">
-        <div class="list-group" data-bind="foreach: venues">
-          <a class="list-group-item link" data-bind="click: $parent.edit"><span class="h4" data-bind="text: name"></span><small data-bind="text: addressLong()"></small></a>
+        <div class="list-group" data-bind="foreach: $data">
+          <a class="list-group-item link" data-bind="click: $root.venue"><span class="h4" data-bind="text: name"></span><small data-bind="text: addressLong()"></small></a>
         </div>
       </div>
     </script>
@@ -117,24 +132,23 @@
 
     <!-- notifications_pending -->
     <script type="text/html" id="notifications_pending">
-      <!-- ko if: notifications_pending -->
-      <!-- ko if: !notification() -->
+      <!-- ko if: notifications_pending().length -->
       <h4>Pending Notifications</h4>
       <!-- ko template: { name: 'notification_list', data: notifications_pending } --><!-- /ko -->
       <!-- /ko -->
-      <!-- /ko -->
+      <div class="form-group">
+        <button type="button" class="btn btn-default" data-bind="click: $root.newNotification">New</button>
+        <button type="button" class="btn btn-default" data-bind="click: $root.sendNotifications">Send All</button>
+        <button type="button" class="btn btn-default" data-bind="click: $root.cleanNotifications">Clean</button>
+      </div>
     </script>
 
     <!-- notification list -->
     <script type="text/html" id="notification_list">
       <div class="form-group">
-        <div class="list-group" data-bind="foreach: notifications">
+        <div class="list-group" data-bind="foreach: $data">
           <a class="list-group-item link" data-bind="click: $parent.edit"><span class="h4" data-bind="text: text"></span></a>
         </div>
-
-        <button type="button" class="btn btn-default" data-bind="click: $root.newNotification">New</button>
-        <button type="button" class="btn btn-default" data-bind="click: $root.sendNotifications">Send All</button>
-        <button type="button" class="btn btn-default" data-bind="click: $root.cleanNotifications">Clean</button>
       </div>
     </script>
 
@@ -275,9 +289,7 @@
     <div class="modal fade" id="alert" tabindex="-1" role="dialog">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-body">
-            ...
-          </div>
+          <div class="modal-body" data-bind="text: status"></div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
           </div>
@@ -291,6 +303,7 @@
     <script src="js/knockout-3.0.0.js"></script>
     <script src="js/path.min.js"></script>
     <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCMWL8VtaTA5ORZro3vPvwfZxWel1sgwPg&amp;sensor=false"></script>
+    <script src="js/jquery.pf.js"></script>
     <script src="js/pf-mgmt2.js" defer></script>
   </body>
 </html>

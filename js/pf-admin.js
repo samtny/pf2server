@@ -1,0 +1,6 @@
+
+(function($) {
+  $.pinfinder = $.pinfinder || {};
+
+
+}(jQuery));
