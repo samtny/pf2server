@@ -8,7 +8,41 @@ if (!String.prototype.format) {
 }
 
 (function($) {
-  var Venue = function(data) {
+  var GameViewModel = function () {
+    var self = this;
+
+    self.name = ko.observable();
+    self.manufacturer = ko.observable();
+    self.year = ko.observable();
+    self.ipdb = ko.observable();
+  };
+
+  var CommentViewModel = function (data) {
+    var self = this;
+
+    self.id = ko.observable(data.id);
+    self.venueid = ko.observalbe(data.venueid);
+    self.text = ko.observable(data.text);
+  };
+
+  var UserViewModel = function (data) {
+    var self = this;
+
+    self.id = data.id;
+    self.username = ko.observable(data.username);
+    self.firstName = ko.observable(data.fname);
+    self.lastName = ko.observable(data.lname);
+    self.lastNotified = ko.observable(data.lastnotified);
+    self.banned = ko.observable(data.banned);
+
+    self.stats = function() {
+      return '...';
+    }
+  };
+
+  $.pf = {};
+
+  $.pf.Venue = function(data) {
     var self = this;
 
     self.id = data.id;
@@ -46,7 +80,7 @@ if (!String.prototype.format) {
     };
   };
 
-  var Notification = function(data) {
+  $.pf.Notification = function(data) {
     var self = this;
 
     self.id = data.id;
@@ -57,19 +91,45 @@ if (!String.prototype.format) {
     self.userStats = ko.observable(data.userStats);
   };
 
-  $.pf = {};
+  $.pf.VenueQuery = function (opts) {
+    var query = this;
+
+    query.f = 'json';
+
+    if (opts.game !== undefined && opts.game !== null && opts.game.trim().length > 0) {
+      query.t = 'game';
+      query.q = opts.game;
+    } else if (opts.name !== undefined && opts.name !== null && opts.name.trim().length > 0) {
+      query.t = 'venue';
+      query.q = opts.name;
+    }
+
+    if (opts.address !== undefined && opts.address !== null && opts.address.trim().length > 0) {
+      query.n = opts.address;
+    }
+
+    return query;
+  };
 
   $.pf.Pinfinder = function () {
     var self = this,
       search_url = 'pf';
 
+    self.request = function (query) {
+      console.log('query', query);
+      return $.ajax({
+        url: search_url,
+        data: query
+      });
+    };
+
     self.getRecent = function(oa) {
-      $.ajax({ url: search_url + '?f=json&l=20' })
+      return $.ajax({ url: search_url + '?f=json&l=20' })
         .done(function (data) {
           oa([]);
 
           _.each(data.venues, function (venue) {
-            oa.push(new Venue(venue));
+            oa.push(new $.pf.Venue(venue));
           });
         });
     };
@@ -95,7 +155,7 @@ if (!String.prototype.format) {
           oa([]);
 
           _.each(data.venues, function (venue) {
-            oa.push(new Venue(venue));
+            oa.push(new $.pf.Venue(venue));
           });
         });
 
@@ -117,7 +177,7 @@ if (!String.prototype.format) {
 
     self.createApprovedVenueNotification = function (venue) {
       if (venue.approved() === true && venue.source() === 'user') {
-        var notification = new Notification({
+        var notification = new $.pf.Notification({
           text: approvedMsg.format(venue.name()),
           global: 'false',
           extra: 'q=' + venue.id,
@@ -188,15 +248,15 @@ if (!String.prototype.format) {
           oa([]);
 
           _.each(data.notifications, function (notification) {
-            oa.push(new Notification(notification));
+            oa.push(new $.pf.Notification(notification));
           });
-          //o(new NotificationList(data.notifications));
+          //o(new $.pf.NotificationList(data.notifications));
           //self.notifications_pending().selected.subscribe(self.editNotification);
         });
     };
 
     self.newNotification = function (opts) {
-      return new Notification(opts);
+      return new $.pf.Notification(opts);
     };
 
     self.newGlobalNotification = function () {
@@ -241,40 +301,14 @@ if (!String.prototype.format) {
     };
 
     self.deleteNotification = function (notification) {
-      var deleteNotification = this;
-
-      deleteNotification.done = function (callback) {
-        deleteNotification.doneCallback = callback;
-
-        return deleteNotification;
-      };
-
-      deleteNotification.always = function (callback) {
-        deleteNotification.alwaysCallback = callback;
-
-        return deleteNotification;
-      };
-
-      $.ajax({
+      return $.ajax({
         url: admin_url,
         type: 'POST',
         data: {
           op: 'deleteNotification',
-          data: ko.toJS(notification)
+          data: ko.toJSON(notification)
         }
-      })
-        .done(function (data) {
-          if (deleteNotification.doneCallback !== undefined) {
-            deleteNotification.doneCallback(data);
-          }
-        })
-        .always(function (arg0) {
-          if (deleteNotification.alwaysCallback !== undefined) {
-            deleteNotification.alwaysCallback(arg0);
-          }
-        });
-
-      return deleteNotification;
+      });
     };
 
     self.sendNotifications = function () {

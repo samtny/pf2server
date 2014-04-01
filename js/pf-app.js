@@ -1,9 +1,12 @@
 /*global alert, confirm, google, YUI */
 "use strict";
-var pf_rel_path = "./pf2";
+
+var pf_rel_path = "./pf2";
 var pf_server_url = pf_rel_path + "/pf";
 var pf_app_url = pf_rel_path + "/pf-app.php";
-var tip_url = pf_rel_path + "/pf-util.php?action=gettip";var gamedict_url = "./gamedict.txt";
+var tip_url = pf_rel_path + "/pf-util.php?action=gettip";
+
+var gamedict_url = "./gamedict.txt";
 var ipdb_machine_url = "http://www.ipdb.org/machine.cgi?id=";
 
 var map;
@@ -750,7 +753,7 @@ function venueFieldChanged() {
 }
 
 function refreshCommentDisplay() {
-	$('#comments ul').html('');
+	$('#unapproved_comments ul').html('');
 	$(commentList).each(function (i) {
 		$('#comments ul').append('<li><label>' + this.ctext + '</label></li>');
 	});
@@ -1037,7 +1040,7 @@ function addCommentButtonClick() {
 			$('#newcomment').val('');
 			
 		} else {
-			alert('Sorry, no html allowed in comments...');
+			alert('Sorry, no html allowed in unapproved_comments...');
 		}
 		
 	}
@@ -1060,11 +1063,11 @@ function addCommentToList(comment, top) {
 
 function refreshCommentDisplay() {
 
-	$('#comments ul').html('');
+	$('#unapproved_comments ul').html('');
 	
 	$(commentList).each(function (i) {
 			
-		$('#comments ul').append('<li><label>' + this.ctext + '</label></li>');
+		$('#unapproved_comments ul').append('<li><label>' + this.ctext + '</label></li>');
 			
 	});
 	

@@ -34,7 +34,7 @@ define('PF_ENDPOINT_PF2', 'http://mysite.pinfinder.com/installdir/pf');
 define('PF_LOG_FILE_PF2', '/path/to/log/dir/pf-log.txt');
 define('PF_LOG_FILE_FSQ', '/path/to/log/dir/pf-log-fsq.txt');
 
-// notifications;
+// notifications_pending;
 define('PF_NOTIFICATION_MAX_AGE_DAYS', 7);
 define('PF_NEW_LOCATION_APPROVED_MSG_GENERIC', "The venue you recently added was approved!  Thank you!  -The Pinfinder Team");
 define('PF_NEW_LOCATION_APPROVED_MSG_TEMPLATE', "The venue '%s' you added was approved!  Thank you!  -The Pinfinder Team");

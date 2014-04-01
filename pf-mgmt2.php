@@ -6,6 +6,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/bootstrap-theme.min.css" rel="stylesheet">
     <link href="css/pf-mgmt2.css" rel="stylesheet">
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
   </head>
   <body>
     <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -34,9 +35,13 @@
           <div class="content">
             <div id="home">
               <!-- ko template: 'stats' --><!-- /ko -->
-              <!-- ko template: 'unapproved_venues' --><!-- /ko -->
-              <!-- ko template: 'unapproved_comments' --><!-- /ko -->
-              <!-- ko template: 'recent_venues' --><!-- /ko -->
+              <div class="row">
+                <div class="col-xs-12 col-lg-6">
+                  <!-- ko template: 'unapproved_venues' --><!-- /ko -->
+                  <!-- ko template: 'recent_venues' --><!-- /ko -->
+                </div>
+                <!-- ko template: 'unapproved_comments' --><!-- /ko -->
+              </div>
             </div>
 
             <div class="form-group" id="search">
@@ -62,31 +67,16 @@
 
     <!-- stats -->
     <script type="text/html" id="stats">
-      <div class="panel panel-default">
-        <div class="panel-body">
-          <div class="row" data-bind="with: stats">
-            <div class="col-xs-6 col-sm-2">
-              <label>Venues:</label>
-              <span data-bind="text: parseInt(venues).toLocaleString()"></span>
-            </div>
-            <div class="col-xs-6 col-sm-2">
-              <label>New:</label>
-              <span data-bind="text: parseInt(n30day).toLocaleString()"></span>
-            </div>
-            <div class="col-xs-6 col-sm-2">
-              <label>Updated:</label>
-              <span data-bind="text: parseInt(u30day).toLocaleString()"></span>
-            </div>
-            <div class="col-xs-6 col-sm-2">
-              <label>Users:</label>
-              <span data-bind="text: parseInt(users).toLocaleString()"></span>
-            </div>
-            <div class="col-xs-6 col-sm-2">
-              <label>Machines:</label>
-              <span data-bind="text: parseInt(machines).toLocaleString()"></span>
-            </div>
+      <div class="list-group" data-bind="with: stats">
+        <a class="list-group-item link">
+          <div class="row">
+            <div class="col-xs-6 col-sm-2"><span class="h5">Venues: </span><small data-bind="text: parseInt(venues).toLocaleString()"></small></div>
+            <div class="col-xs-6 col-sm-2"><span class="h5">New: </span><small data-bind="text: parseInt(n30day).toLocaleString()"></small></div>
+            <div class="col-xs-6 col-sm-2"><span class="h5">Updated: </span><small data-bind="text: parseInt(u30day).toLocaleString()"></small></div>
+            <div class="col-xs-6 col-sm-2"><span class="h5">Users: </span><small data-bind="text: parseInt(users).toLocaleString()"></small></div>
+            <div class="col-xs-6 col-sm-2"><span class="h5">Machines: </span><small data-bind="text: parseInt(machines).toLocaleString()"></small></div>
           </div>
-        </div>
+        </a>
       </div>
     </script>
 
@@ -108,10 +98,8 @@
 
     <!-- venue_list -->
     <script type="text/html" id="venue_list">
-      <div class="form-group">
-        <div class="list-group" data-bind="foreach: $data">
-          <a class="list-group-item link" data-bind="click: $root.venue"><span class="h4" data-bind="text: name"></span><small data-bind="text: addressLong()"></small></a>
-        </div>
+      <div class="list-group" data-bind="foreach: $data">
+        <a class="list-group-item link" data-bind="click: $root.venue"><span class="h5" data-bind="text: name"></span><small data-bind="text: addressLong()"></small></a>
       </div>
     </script>
 
@@ -147,7 +135,7 @@
     <script type="text/html" id="notification_list">
       <div class="form-group">
         <div class="list-group" data-bind="foreach: $data">
-          <a class="list-group-item link" data-bind="click: $parent.edit"><span class="h4" data-bind="text: text"></span></a>
+          <a class="list-group-item link" data-bind="click: $root.notification"><span class="h4" data-bind="text: text"></span></a>
         </div>
       </div>
     </script>
@@ -180,36 +168,43 @@
 
     <!-- venue -->
     <script type="text/html" id="venue">
-      <div class="form-group">
-        <label for="venueName">Venue</label>
-        <input type="text" class="form-control" id="venueName" placeholder="Venue Name" data-bind="value: name">
-      </div>
-      <div class="form-group">
-        <label for="venueStreet">Street</label>
-        <input type="text" class="form-control" id="venueStreet" placeholder="Street" data-bind="value: street">
-      </div>
-      <div class="form-group">
-        <label for="venueCity">City</label>
-        <input type="text" class="form-control" id="venueCity" placeholder="City" data-bind="value: city">
-      </div>
-      <div class="form-group">
-        <label for="venueState">State</label>
-        <input type="text" class="form-control" id="venueState" placeholder="State" data-bind="value: state">
-      </div>
-      <div class="form-group">
-        <label for="venueZipcode">Zipcode</label>
-        <input type="text" class="form-control" id="venueZipcode" placeholder="Zipcode" data-bind="value: zipcode">
-      </div>
-      <div class="form-group">
-        <div id="map-canvas"></div>
-      </div>
-      <div class="form-group">
-        <label for="venuePhone">Phone</label>
-        <input type="tel" class="form-control" id="venuePhone" placeholder="Phone" data-bind="value: phone">
-      </div>
-      <div class="form-group">
-        <label for="venueURL">URL</label>
-        <input type="url" class="form-control" id="venueURL" placeholder="URL" data-bind="value: url">
+      <div class="row">
+        <div class="col-xs-12 col-md-6">
+          <div class="form-group">
+            <label for="venueName">Venue</label>
+            <input type="text" class="form-control" id="venueName" placeholder="Venue Name" data-bind="value: name">
+          </div>
+          <div class="form-group">
+            <label for="venueStreet">Street</label>
+            <input type="text" class="form-control" id="venueStreet" placeholder="Street" data-bind="value: street">
+          </div>
+          <div class="form-group">
+            <label for="venueCity">City</label>
+            <input type="text" class="form-control" id="venueCity" placeholder="City" data-bind="value: city">
+          </div>
+          <div class="form-group">
+            <label for="venueState">State</label>
+            <input type="text" class="form-control" id="venueState" placeholder="State" data-bind="value: state">
+          </div>
+          <div class="form-group">
+            <label for="venueZipcode">Zipcode</label>
+            <input type="text" class="form-control" id="venueZipcode" placeholder="Zipcode" data-bind="value: zipcode">
+          </div>
+        </div>
+        <div class="col-xs-12 col-md-6">
+          <div class="form-group">
+            <label for="map-canvas">Map</label>
+            <div id="map-canvas"></div>
+          </div>
+          <div class="form-group">
+            <label for="venuePhone">Phone</label>
+            <input type="tel" class="form-control" id="venuePhone" placeholder="Phone" data-bind="value: phone">
+          </div>
+          <div class="form-group">
+            <label for="venueURL">URL</label>
+            <input type="url" class="form-control" id="venueURL" placeholder="URL" data-bind="value: url">
+          </div>
+        </div>
       </div>
       <div class="checkbox">
         <label>
@@ -246,7 +241,16 @@
     <script type="text/html" id="search_venue">
       <div class="form-group" data-bind="with: search_venue">
         <div class="form-group">
-          <input type="text" class="form-control" placeholder="Venue Name" data-bind="value: name">
+          <label for="searchName">Venue</label>
+          <input type="text" class="form-control" id="searchName" placeholder="Venue Name" data-bind="value: name">
+        </div>
+        <div class="form-group">
+          <label for="searchGame">Game</label>
+          <input type="text" class="form-control" id="searchGame" placeholder="Game Name" data-bind="value: game">
+        </div>
+        <div class="form-group">
+          <label for="searchAddress">Address / Nearby</label>
+          <input type="text" class="form-control" id="searchAddress" placeholder="Current Location" data-bind="value: address">
         </div>
         <div class="form-group">
           <button type="button" class="btn btn-default" data-bind="click: submit">Search</button>

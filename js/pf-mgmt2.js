@@ -12,60 +12,50 @@ if (!String.prototype.format) {
     search_url = 'pf',
     clearPanel = function () {
       $('.content .active').hide();
+      $('html, body').scrollTop(0);
     };
 
   $(document).ready(function () {
-    var GameViewModel = function () {
-      var self = this;
+    var SearchVenue = function() {
+      var self = this,
+        pinfinder = new $.pf.Pinfinder();
 
       self.name = ko.observable();
-      self.manufacturer = ko.observable();
-      self.year = ko.observable();
-      self.ipdb = ko.observable();
-    };
+      self.game = ko.observable();
+      self.address = ko.observable();
 
-    var CommentViewModel = function (data) {
-      var self = this;
-
-      self.id = ko.observable(data.id);
-      self.venueid = ko.observalbe(data.venueid);
-      self.text = ko.observable(data.text);
-    };
-
-    var UserViewModel = function (data) {
-      var self = this;
-
-      self.id = data.id;
-      self.username = ko.observable(data.username);
-      self.firstName = ko.observable(data.fname);
-      self.lastName = ko.observable(data.lname);
-      self.lastNotified = ko.observable(data.lastnotified);
-      self.banned = ko.observable(data.banned);
-
-      self.stats = function() {
-        return '...';
-      }
-    };
-
-    var SearchVenueViewModel = function() {
-      var self = this;
-
-      self.name = ko.observable();
       self.venues = ko.observableArray();
 
+      self.geolocate = function () {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function (position) {
+            self.latLng = position.coords.latitude + ',' + position.coords.longitude;
+          }, function (error) {
+
+          });
+        }
+      };
+
       self.submit = function() {
-        $.ajax({
-          url: search_url + '?f=json&t=venue&q=' + self.name()
-        }).done(function (data) {
+        pinfinder.request(new $.pf.VenueQuery({
+            name: self.name(),
+            game: self.game(),
+            address: (self.address() !== undefined && self.address().length > 0) ? self.address() : self.latLng
+          }))
+          .done(function (data) {
           var venues = [];
 
           _.each(data.venues, function (venue) {
-            venues.push(new VenueViewModel(venue));
+            venues.push(new $.pf.Venue(venue));
           });
 
           self.venues(venues);
         });
       };
+
+      self.geolocate();
+
+      return self;
     };
 
     var PinfinderManagementViewModel = function () {
@@ -93,6 +83,7 @@ if (!String.prototype.format) {
       self.title.subscribe(function (title) { window.document.title = title + ' - Pinfinder Management'; });
 
       self.status.subscribe(function () { $('#alert').modal(); });
+      self.status.extend({ notify: 'always' });
 
       self.venue.subscribe(function (venue) { location.hash = (venue !== null ? '#/venue_edit' : '#/home'); });
 
@@ -147,10 +138,10 @@ if (!String.prototype.format) {
       };
 
       self.deleteNotification = function(notification) {
-        admin.deleteNotification(self.notification())
+        admin.deleteNotification(notification)
           .done(function() {
             self.notification(null);
-            self.getNotificationsPending();
+            admin.getNotificationsPending(self.notifications_pending);
           })
           .always(function (data) {
             self.status('Server Response: ' + data.message);
@@ -244,60 +235,39 @@ if (!String.prototype.format) {
 
       self.searchReturnedResults = function (results) {
         if (results.length === 1) {
-          self.editVenue(results[0]);
+          self.venue(results[0]);
         }
       };
 
       init = function() {
-        Path.map('#/home').to(function() {
-          $('.content > div').removeClass('active');
-          $('#home').addClass('active').fadeIn();
-          self.title('Home');
+        var gotoPath = function (id, title, func) {
+          return function () {
+            $('.content > div').removeClass('active');
+            $(id).addClass('active').fadeIn();
+            self.title(title);
+            if (typeof func === 'function') { func(); }
+          };
+        };
 
+        Path.map('#/home').to(new gotoPath('#home', 'Home', function () {
           admin.getStats(self.stats)
             .getUnapproved(self.unapproved_venues)
             .getUnapprovedComments(self.unapproved_comments);
 
           pinfinder.getRecent(self.recent_venues);
-        }).enter(clearPanel);
+        })).enter(clearPanel);
 
-        Path.map('#/venue_edit').to(function() {
-          if (self.venue() == undefined) {
-            location.hash = '#/home';
-          } else {
-            $('.content > div').removeClass('active');
-            $('#venue_edit').addClass('active').fadeIn();
-            self.title(self.venue().name());
-            _.defer(self.geocodeVenue);
-          }
-        }).enter(clearPanel);
+        Path.map('#/venue_edit').to(new gotoPath('#venue_edit', 'Venue', function () {
+          _.defer(self.geocodeVenue);
+        })).enter(clearPanel);
 
-        Path.map('#/notifications').to(function() {
-          $('.content > div').removeClass('active');
-          $('#notifications').addClass('active').fadeIn();
-          self.title('Notifications');
-
+        Path.map('#/notifications').to(new gotoPath('#notifications', 'Notifications', function () {
           admin.getNotificationsPending(self.notifications_pending);
-        }).enter(clearPanel);
+        })).enter(clearPanel);
 
-        Path.map('#/user').to(function() {
-          $('.content > div').removeClass('active');
-          $('#user_edit').addClass('active').fadeIn();
-          self.title('User Edit');
-        }).enter(clearPanel);
-
-        Path.map('#/game/new').to(function() {
-          self.game(new GameViewModel());
-          $('.content > div').removeClass('active');
-          $('#game_edit').addClass('active').fadeIn();
-          self.title('Add Game');
-        }).enter(clearPanel);
-
-        Path.map('#/search').to(function() {
-          $('.content > div').removeClass('active');
-          $('#search').addClass('active').fadeIn();
-          self.title('Search');
-        }).enter(clearPanel);
+        Path.map('#/user').to(new gotoPath('#user_edit', 'User Edit')).enter(clearPanel);
+        Path.map('#/game/new').to(new gotoPath('#game_edit', 'Add Game', function () { self.game(new GameViewModel); })).enter(clearPanel);
+        Path.map('#/search').to(new gotoPath('#search', 'Search')).enter(clearPanel);
 
         Path.root('#/home');
 
@@ -306,7 +276,7 @@ if (!String.prototype.format) {
         self.getOptions();
       };
 
-      self.search_venue(new SearchVenueViewModel());
+      self.search_venue(new SearchVenue());
       self.search_venue().venues.subscribe(self.searchReturnedResults);
 
       init();
