@@ -268,6 +268,7 @@ if (!String.prototype.format) {
         Path.map('#/user').to(new gotoPath('#user_edit', 'User Edit')).enter(clearPanel);
         Path.map('#/game/new').to(new gotoPath('#game_edit', 'Add Game', function () { self.game(new GameViewModel); })).enter(clearPanel);
         Path.map('#/search').to(new gotoPath('#search', 'Search')).enter(clearPanel);
+        Path.map('#/privacy').to(new gotoPath('#privacy', 'Privacy')).enter(clearPanel);
 
         Path.root('#/home');
 
