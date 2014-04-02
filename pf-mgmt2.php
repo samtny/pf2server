@@ -21,11 +21,19 @@
         </div>
         <div class="collapse navbar-collapse" id="pf-navbar-collapse">
           <ul class="nav navbar-nav">
-            <li><a href="#/find">Find</a></li>
             <li><a href="#/notifications">Notifications</a></li>
             <li><a href="#/search">Search</a></li>
             <li><a href="#/game/new">Add Game</a></li>
-            <li><a href="#/privacy">Privacy</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span data-bind="text: about">About</span> <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="#/login">Login</a></li>
+                <li><a href="#/faq">FAQ</a></li>
+                <li><a href="#/terms">Terms of Use</a></li>
+              </ul>
+            </li>
           </ul>
         </div>
       </div>
@@ -38,76 +46,6 @@
               <!-- ko template: 'stats' --><!-- /ko -->
               <div class="row">
                 <div class="col-xs-12 col-lg-6">
-                  <div id="fb-root"></div>
-                  <script>
-                    window.fbAsyncInit = function() {
-                      FB.init({
-                        appId      : '320227584664034',
-                        status     : true, // check login status
-                        cookie     : true, // enable cookies to allow the server to access the session
-                        xfbml      : true  // parse XFBML
-                      });
-
-                      // Here we subscribe to the auth.authResponseChange JavaScript event. This event is fired
-                      // for any authentication related change, such as login, logout or session refresh. This means that
-                      // whenever someone who was previously logged out tries to log in again, the correct case below
-                      // will be handled.
-                      FB.Event.subscribe('auth.authResponseChange', function(response) {
-                        // Here we specify what we do with the response anytime this event occurs.
-                        if (response.status === 'connected') {
-                          // The response object is returned with a status field that lets the app know the current
-                          // login status of the person. In this case, we're handling the situation where they
-                          // have logged in to the app.
-                          testAPI();
-                        } else if (response.status === 'not_authorized') {
-                          // In this case, the person is logged into Facebook, but not into the app, so we call
-                          // FB.login() to prompt them to do so.
-                          // In real-life usage, you wouldn't want to immediately prompt someone to login
-                          // like this, for two reasons:
-                          // (1) JavaScript created popup windows are blocked by most browsers unless they
-                          // result from direct interaction from people using the app (such as a mouse click)
-                          // (2) it is a bad experience to be continually prompted to login upon page load.
-                          FB.login();
-                        } else {
-                          // In this case, the person is not logged into Facebook, so we call the login()
-                          // function to prompt them to do so. Note that at this stage there is no indication
-                          // of whether they are logged into the app. If they aren't then they'll see the Login
-                          // dialog right after they log in to Facebook.
-                          // The same caveats as above apply to the FB.login() call here.
-                          FB.login();
-                        }
-                      });
-                    };
-
-                    // Load the SDK asynchronously
-                    (function(d){
-                      var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
-                      if (d.getElementById(id)) {return;}
-                      js = d.createElement('script'); js.id = id; js.async = true;
-                      js.src = "//connect.facebook.net/en_US/all.js";
-                      ref.parentNode.insertBefore(js, ref);
-                    }(document));
-
-                    // Here we run a very simple test of the Graph API after login is successful.
-                    // This testAPI() function is only called in those cases.
-                    function testAPI() {
-                      console.log('Welcome!  Fetching your information.... ');
-                      FB.api('/me', function(response) {
-                        console.log('response', response);
-                        console.log('Good to see you, ' + response.name + '.');
-                      });
-                      FB.getLoginStatus(function (response) {
-                        console.log('response', response);
-                      });
-                    }
-                  </script>
-
-                  <!--
-                    Below we include the Login Button social plugin. This button uses the JavaScript SDK to
-                    present a graphical Login button that triggers the FB.login() function when clicked. -->
-
-                  <fb:login-button show-faces="true" width="200" max-rows="1"></fb:login-button>
-
                   <!-- ko template: 'unapproved_venues' --><!-- /ko -->
                   <!-- ko template: 'recent_venues' --><!-- /ko -->
                 </div>
@@ -128,25 +66,45 @@
             <div class="form-group" id="game_edit" data-bind="template: { if: game, name: 'game', data: game }"></div>
             <div class="form-group" id="user_edit" data-bind="template: { if: user, name: 'user', data: user }"></div>
 
-            <div class="form-group" id="privacy">
+            <div class="form-group" id="login">
+              <h4>Login to Pinfinder Pinball Finder</h4>
+              <p>
+                Choose a service below to login to Pinball Finder:
+              </p>
+              <div id="fb-root"></div>
+              Facebook: <fb:login-button size="medium"></fb:login-button>
+            </div>
+
+            <div class="form-group" id="terms">
+              <h3>Terms of Use</h3>
+              <p>
+                By using this website, you agree to the following; Nothing.  It is a website, not a marketplace.
+              </p>
               <h4>Privacy Policy</h4>
               <p>
                 Your privacy is important enough that we feel we should be clear about how we use any data you submit to this website:
               </p>
               <p>
-                We do not knowingly keep or collect any personal information about you.  You should be aware, however, that like all web servers our server does keep normal access logs that may include the date, time, IP Address and additional information about your connection to Pinfinder Pinball Finder.  We don't generally look at these logs, but they do exist.
+                We do not knowingly keep or collect any personal information about you.  You should be aware, however, that like all web servers our server does keep normal access logs that may include the date, time, IP Address and additional information about your connection to Pinfinder Pinball Finder.
+              </p>
+              <h4>Social Media</h4>
+              <p>
+                When you choose to login to this site using Facebook or any social network, we store your (<a href="https://www.facebook.com/me">already publicly available</a>) 'id' for that service.  This helps us track how you are using Pinfinder Pinball Finder, so we can give you badges and other cool stuff that can only have a "Positive Effect On Your Life"&reg;.  We do not collect any other information about you.  To help you feel completely comfortable with this, or at least understand what we are collecting, here is the (again, already publicly available) Facebook id of the creator of this site; 1430209517.  There.  Now if we do anything with your information that you don't like, you can do it right back to us.  Tit-for-tat.
               </p>
               <p>
-                When you choose login to this site using Facebook or any social network, we do store your (<a href="https://www.facebook.com/me">already publicly available</a>) 'id' for that service.  This helps us track how you are using Pinfinder Pinball Finder, so we can give you badges and other cool stuff that can only have a "Positive Effect On Your Life"&reg;.  We do not collect any other information about you.  So that you may feel completely comfortable about this, or at least understand what we are collecting, here is the (again, already publicly available) Facebook id of the creator of this site; 1430209517.  There.  Now if we do anything with your information that you don't like, you can do it right back to us.  Tit-for-tat.
+                As a side note, you may be interested to know that most of these social networks do TRY to cram a bunch of your personal information down our throats when you login here.  Facebook Login, for example, wants to give us your; full name, hometown, email address, location, username and gender.  But, like some kind of biblical samaritan, we quietly reject this information and turn the other butt-cheek.  We don't store it or use it, because we are not interested in it.  But we do feel obligated to mention it here.
               </p>
+              <h4>Partners, Third Parties</h4>
               <p>
-                As a side note, you may be interested to know that most of these social networks do try to stuff a bunch of your personal information down our throats when you use their service to login here.  For Facebook Login, this includes your; full name, hometown, email address, location, timezone, username and gender.  But, like some kind of biblical samaritan, we quietly reject this information and turn the other cheek.
+                No, we do not currently have any partners or 'third-parties' with whom we share any information.
               </p>
+              <h4>Advertising</h4>
               <p>
-                Partners, Third Parties: No, we do not currently have any partners or 'third-parties' with whom we share any information.
+                Nope.  We don't carry any avertising, and we don't share any of your information with advertisers.
               </p>
+              <h4>Cookies</h4>
               <p>
-                Advertising: Nope.  We don't carry any avertising, and we don't share any information with advertisers.
+                We don't set any cookies.  Another miracle.
               </p>
               <p>
                 None of this is a joke; your privacy is important to us.  That's why we put it right here.
@@ -407,6 +365,7 @@
     <script src="js/path.min.js"></script>
     <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCMWL8VtaTA5ORZro3vPvwfZxWel1sgwPg&amp;sensor=false"></script>
     <script src="js/jquery.pf.js"></script>
+    <script src="js/pf-auth.js"></script>
     <script src="js/pf-mgmt2.js" defer></script>
   </body>
 </html>

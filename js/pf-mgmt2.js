@@ -67,6 +67,8 @@ if (!String.prototype.format) {
 
       self.title = ko.observable();
       self.status = ko.observable();
+      self.about = ko.observable('About');
+
       self.stats = ko.observable();
       self.unapproved_venues = ko.observableArray();
       self.recent_venues = ko.observableArray();
@@ -268,7 +270,9 @@ if (!String.prototype.format) {
         Path.map('#/user').to(new gotoPath('#user_edit', 'User Edit')).enter(clearPanel);
         Path.map('#/game/new').to(new gotoPath('#game_edit', 'Add Game', function () { self.game(new GameViewModel); })).enter(clearPanel);
         Path.map('#/search').to(new gotoPath('#search', 'Search')).enter(clearPanel);
-        Path.map('#/privacy').to(new gotoPath('#privacy', 'Privacy')).enter(clearPanel);
+
+        Path.map('#/terms').to(new gotoPath('#terms', 'Terms of Use')).enter(clearPanel);
+        Path.map('#/login').to(new gotoPath('#login', 'Login')).enter(clearPanel);
 
         Path.root('#/home');
 
