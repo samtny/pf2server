@@ -62,11 +62,13 @@ if (!String.prototype.format) {
       var self = this,
         pinfinder = new $.pf.Pinfinder(),
         admin = new $.pf.Admin(),
+        github = new $.pf.Github(),
         geocoder = new google.maps.Geocoder(),
         map;
 
       self.title = ko.observable();
       self.status = ko.observable();
+      self.mailto = ko.observable(['mailto:', 'pin', 'finder', 'app', '@', 'pinballfinder.org', '?Subject=Pinballfinder.org'].join(''));
       self.about = ko.observable('About');
 
       self.stats = ko.observable();
@@ -81,6 +83,7 @@ if (!String.prototype.format) {
       self.searchVenueResults = ko.observableArray();
       self.user = ko.observable();
       self.notifications_pending = ko.observableArray();
+      self.commits = ko.observableArray();
 
       self.title.subscribe(function (title) { window.document.title = title + ' - Pinfinder Management'; });
 
@@ -274,11 +277,16 @@ if (!String.prototype.format) {
         Path.map('#/terms').to(new gotoPath('#terms', 'Terms of Use')).enter(clearPanel);
         Path.map('#/login').to(new gotoPath('#login', 'Login')).enter(clearPanel);
 
+        Path.map('#/code').to(new gotoPath('#code', 'Code')).enter(clearPanel);
+
         Path.root('#/home');
 
         Path.listen();
 
         self.getOptions();
+
+        github.getCommits(self.commits).done(function (data) { console.log('data', data); });
+
       };
 
       self.search_venue(new SearchVenue());

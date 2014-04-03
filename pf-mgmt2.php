@@ -26,11 +26,13 @@
             <li><a href="#/game/new">Add Game</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
+            <li><a data-bind="attr: { href: mailto }" target="_top">Contact</a></li>
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span data-bind="text: about">About</span> <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li><a href="#/login">Login</a></li>
                 <li><a href="#/faq">FAQ</a></li>
+                <li><a href="#/code">Source Code</a></li>
                 <li><a href="#/terms">Terms of Use</a></li>
               </ul>
             </li>
@@ -73,6 +75,10 @@
               </p>
               <div id="fb-root"></div>
               Facebook: <fb:login-button size="medium"></fb:login-button>
+            </div>
+
+            <div class="form-group" id="code">
+              <!-- ko template: 'github_commits' --><!-- /ko -->
             </div>
 
             <div class="form-group" id="terms">
@@ -346,6 +352,18 @@
       </div>
     </script>
 
+    <!-- github_commits -->
+    <script type="text/html" id="github_commits">
+      <h4>Commit log for Pinball Finder</h4>
+      <div class="form-group">
+        <div class="list-group" data-bind="foreach: commits">
+          <a class="list-group-item link" data-bind="attr: { href: url }">
+            <span data-bind="text: summary"></span>
+          </a>
+        </div>
+      </div>
+    </script>
+
     <!-- Modal -->
     <div class="modal fade" id="alert" tabindex="-1" role="dialog">
       <div class="modal-dialog">
@@ -366,6 +384,7 @@
     <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCMWL8VtaTA5ORZro3vPvwfZxWel1sgwPg&amp;sensor=false"></script>
     <script src="js/jquery.pf.js"></script>
     <script src="js/pf-auth.js"></script>
+    <script src="js/pf-github.js"></script>
     <script src="js/pf-mgmt2.js" defer></script>
   </body>
 </html>
