@@ -58,6 +58,7 @@ if (!String.prototype.format) {
     self.approved = ko.observable(data.approved);
     self.source = ko.observable(data.source);
     self.sourceid = ko.observable(data.sourceid);
+    self.fsq = ko.observable(data.fsq);
 
     self.addressLong = function () {
       var addressLong = ' - ';
@@ -124,7 +125,7 @@ if (!String.prototype.format) {
     };
 
     self.getRecent = function(oa) {
-      return $.ajax({ url: search_url + '?f=json&l=20' })
+      return $.ajax({ url: search_url + '?f=json&l=10' })
         .done(function (data) {
           oa([]);
 

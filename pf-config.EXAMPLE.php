@@ -61,6 +61,7 @@ define('PF_SAME_VENUE_MILES', 1.0);
 define('FSQ_CLIENT_ID', 'MyFSQClientId');
 define('FSQ_CLIENT_SECRET', 'MyFSQClientSecret');
 define('FSQ_VERIFIED_DATE', 'MyFSQVerifiedDateYYYYMMDD');
+define('FSQ_REDIRECT_URI', 'http://' . $_SERVER['SERVER_NAME'] . '/pf2/pf-fsq2.php');
 
 // yelp
 define ('OAUTH_CONSUMER_KEY_YELP', 'MyYelpOauthConsumerKey');

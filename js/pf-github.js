@@ -38,7 +38,6 @@
         _.each(data, function (item) {
           oa.push(new $.pf.Commit(item));
         });
-        console.log(ko.toJS(oa));
       });
     };
 

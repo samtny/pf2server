@@ -61,6 +61,7 @@ if (!String.prototype.format) {
     var PinfinderManagementViewModel = function () {
       var self = this,
         pinfinder = new $.pf.Pinfinder(),
+        fsq = new $.pf.Fsq(),
         admin = new $.pf.Admin(),
         github = new $.pf.Github(),
         geocoder = new google.maps.Geocoder(),
@@ -84,6 +85,7 @@ if (!String.prototype.format) {
       self.user = ko.observable();
       self.notifications_pending = ko.observableArray();
       self.commits = ko.observableArray();
+      self.fsq_access_token = ko.observable();
 
       self.title.subscribe(function (title) { window.document.title = title + ' - Pinfinder Management'; });
 
@@ -91,6 +93,17 @@ if (!String.prototype.format) {
       self.status.extend({ notify: 'always' });
 
       self.venue.subscribe(function (venue) { location.hash = (venue !== null ? '#/venue_edit' : '#/home'); });
+
+      fsq.access_token.subscribe(function (token) {
+        if (token && token.length) {
+          $.ajax({
+            url: 'https://api.foursquare.com/v2/users/self?v=20140411&oauth_token=' + token
+          }).done(function (data) {
+            console.log('data', data);
+            self.about('Welcome, ' + data.response.user.firstName);
+          });
+        }
+      });
 
       self.saveVenue = function() {
         admin.saveVenue(self.venue())
@@ -275,7 +288,7 @@ if (!String.prototype.format) {
         Path.map('#/search').to(new gotoPath('#search', 'Search')).enter(clearPanel);
 
         Path.map('#/terms').to(new gotoPath('#terms', 'Terms of Use')).enter(clearPanel);
-        Path.map('#/login').to(new gotoPath('#login', 'Login')).enter(clearPanel);
+        Path.map('#/login').to(new gotoPath('#login', 'Login', fsq.refresh())).enter(clearPanel);
 
         Path.map('#/code').to(new gotoPath('#code', 'Code')).enter(clearPanel);
 
@@ -283,9 +296,10 @@ if (!String.prototype.format) {
 
         Path.listen();
 
+        fsq.refresh();
         self.getOptions();
 
-        github.getCommits(self.commits).done(function (data) { console.log('data', data); });
+        github.getCommits(self.commits);
 
       };
 

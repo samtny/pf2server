@@ -1,7 +1,7 @@
 <?php include('pf-session.php'); ?>
 <html>
   <head>
-    <title>Pinfinder Management Interface</title>
+    <title>PinballFinder Management Interface</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/bootstrap-theme.min.css" rel="stylesheet">
@@ -74,7 +74,12 @@
                 Choose a service below to login to Pinball Finder:
               </p>
               <div id="fb-root"></div>
-              Facebook: <fb:login-button size="medium"></fb:login-button>
+              <div class="form-group">
+                Facebook: <fb:login-button size="medium"></fb:login-button>
+              </div>
+              <div class="form-group">
+                Foursquare: <a href="https://foursquare.com/oauth2/authenticate?client_id=32ELRIRFDEMAAHSPKAAITTQGMZKXAOBBRJ1EE05ULH2A3CUV&response_type=code&redirect_uri=http://local.pinballfinder.org/pf2/pf-fsq2.php"><img src="https://playfoursquare.s3.amazonaws.com/press/logo/connect-black.png" alt="Connect to Foursquare" /></a>
+              </div>
             </div>
 
             <div class="form-group" id="code">
@@ -267,6 +272,10 @@
             <label for="venueURL">URL</label>
             <input type="url" class="form-control" id="venueURL" placeholder="URL" data-bind="value: url">
           </div>
+          <div class="form-group">
+            <label for="venueFsq">Foursquare Id</label>
+            <input type="text" class="form-control" id="venueFsq" placeholder="Foursquare Id" data-bind="value: fsq">
+          </div>
         </div>
       </div>
       <div class="checkbox">
@@ -383,6 +392,7 @@
     <script src="js/path.min.js"></script>
     <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCMWL8VtaTA5ORZro3vPvwfZxWel1sgwPg&amp;sensor=false"></script>
     <script src="js/jquery.pf.js"></script>
+    <script src="js/jquery.pf.fsq.js"></script>
     <script src="js/pf-auth.js"></script>
     <script src="js/pf-github.js"></script>
     <script src="js/pf-mgmt2.js" defer></script>
