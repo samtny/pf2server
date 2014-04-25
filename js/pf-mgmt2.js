@@ -15,6 +15,15 @@ if (!String.prototype.format) {
       $('html, body').scrollTop(0);
     };
 
+  var GameViewModel = function () {
+    var self = this;
+
+    self.name = ko.observable();
+    self.manufacturer = ko.observable();
+    self.year = ko.observable();
+    self.ipdb = ko.observable();
+  };
+
   $(document).ready(function () {
     var SearchVenue = function() {
       var self = this,
@@ -141,14 +150,14 @@ if (!String.prototype.format) {
       };
 
       self.newNotification = function () {
-        self.notification(self.admin.newGlobalNotification());
+        self.notification(admin.newGlobalNotification());
       };
 
       self.saveNotification = function() {
         admin.saveNotification(self.notification())
           .done(function() {
             self.notification(null);
-            self.getNotificationsPending();
+            admin.getNotificationsPending(self.notifications_pending);
           })
           .always(function (data) {
             self.status('Server Response: ' + data.message);

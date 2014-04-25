@@ -8,15 +8,6 @@ if (!String.prototype.format) {
 }
 
 (function($) {
-  var GameViewModel = function () {
-    var self = this;
-
-    self.name = ko.observable();
-    self.manufacturer = ko.observable();
-    self.year = ko.observable();
-    self.ipdb = ko.observable();
-  };
-
   var CommentViewModel = function (data) {
     var self = this;
 
