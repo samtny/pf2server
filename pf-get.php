@@ -109,7 +109,9 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 		} else if ($t == "game") {
 			$qclean = clean_game_name_string($q);
 			$venueSql .= "and v.venueid in (select v.venueid from venue v inner join machine m on v.venueid = m.venueid inner join game g on m.gameid = g.gameid where (g.abbreviation = '" . mysql_real_escape_string($q) . "' or g.name like '%" . mysql_real_escape_string($q) . "%' or g.nameclean like '%" . mysql_real_escape_string($qclean) . "%')) ";
-		} else if ($t == "fsqid") {
+    } else if ($t == "gameabbr") {
+      $venueSql .= "and v.venueid in (select v.venueid from venue v inner join machine m on v.venueid = m.venueid inner join game g on m.gameid = g.gameid where (g.abbreviation = '" . mysql_real_escape_string($q) . "')) ";
+    } else if ($t == "fsqid") {
 			$venueSql .= "and v.venueid in (select v.venueid from venue v where v.foursquareid = '" . mysql_real_escape_string($q) . "') ";
 		} else if ($t == "city") {
 			$venueSql .= "and v.venueid in (select v.venueid from venue v where v.city = '" . mysql_real_escape_string($q) . "') ";
