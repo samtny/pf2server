@@ -223,8 +223,8 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 				$venue = null;
 			}
 			if ($venue == null) {
-				
-				$venue = new Venue();
+
+				$venue = !$minimal ? new Venue() : new MinimalVenue();
 				$venue->id = (int)$vrow["venueid"];
 				$venue->name = $vrow["venuename"];
 				$venue->lat = (float)$vrow["latitude"];
@@ -281,6 +281,7 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 								$comment->id = (int)$crow["commentid"];
 								$comment->date = date('c', strtotime($crow["commentdate"]));
 								$comment->text = $crow["commenttext"];
+                $t != "mgmt" && $comment->text = date('m/d/y - ', strtotime($crow["commentdate"])) . $comment->text;
 								$venue->addComment($comment);
 							}
 							mysql_free_result($cresult);
