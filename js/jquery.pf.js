@@ -318,7 +318,7 @@ if (!String.prototype.format) {
         return sendNotifications;
       };
 
-      $.ajax({
+      return $.ajax({
         url: admin_url + '?q=sendNotifications'
       })
         .done(function (data) {

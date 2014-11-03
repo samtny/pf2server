@@ -255,7 +255,7 @@ function send_notification($notification, $payload) {
         $bytes .= chr(0) . chr(mb_strlen($payload)); // payload length
         $bytes .= $payload;
 
-        /*
+/*
         header('Content-type: application/json');
         print json_encode(array(
           'notification' => $notification,
@@ -265,9 +265,10 @@ function send_notification($notification, $payload) {
           'errorString' => $errorString,
           'token' => $token,
           'bytes' => $bytes,
+          'bytes_bin2hex' => bin2hex($bytes),
           ));
         exit(0);
-        */
+  */
 
         $result = fwrite($client, $bytes);
 

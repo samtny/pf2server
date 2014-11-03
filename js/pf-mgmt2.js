@@ -182,7 +182,7 @@ if (!String.prototype.format) {
       self.sendNotifications = function () {
         admin.sendNotifications()
           .done(function() {
-            self.getNotificationsPending();
+            admin.getNotificationsPending(self.notifications_pending);
           })
           .always(function (data) {
             self.status('Server Response: ' + data.message);
