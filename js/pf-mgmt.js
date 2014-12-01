@@ -264,7 +264,7 @@ function getGlobalNotifications() {
 }
 
 function handleGlobalNotificationsResult(data) {
-	
+
 	if (data.status == "success") {
 		globalnotifications = data.notifications;
 	}
