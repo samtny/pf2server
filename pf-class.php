@@ -645,6 +645,13 @@ class Venue {
 	}
 }
 
+class MinimalVenue {
+  public $id;
+  public $name;
+  public $lat;
+  public $lon;
+}
+
 class Game {
 	public $id;
 	public $abbr;
