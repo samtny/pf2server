@@ -11,7 +11,7 @@ if ($_POST) {
 	$doc = stripslashes($_POST["doc"]);
 	$hash = $_POST["hash"];
 	
-	pf_log(date("c") . " || post || doc = $doc");
+	//pf_log(date("c") . " || post || doc = $doc");
 	
 	if (hash_matches_document($doc, $hash)) {
 		
@@ -48,7 +48,7 @@ if ($_POST) {
 		}
 		
 	} else {
-		pf_log(date("c") . " || bad hash");
+		//pf_log(date("c") . " || bad hash");
 		header("HTTP/1.1 400 Bad Request");
 	}
 	
@@ -68,7 +68,7 @@ if ($_POST) {
 	$o = $_GET["o"]; // order
 	$f = $_GET["f"]; // format (xml, json)
 	
-	pf_log(date("c") . " || get || q = $q || t = $t || n = $n || l = $l || p = $p || f = $f");
+	//pf_log(date("c") . " || get || q = $q || t = $t || n = $n || l = $l || p = $p || f = $f");
 	
 	$result = get_result($q, $t, $n, $l, $p, $o);
 	
