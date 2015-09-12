@@ -273,122 +273,126 @@ class Result {
 			//$loc->appendChild($name);
 			
 			if (!$minimal) {
-				
-				if ($venue->dist) {
-					$name = $doc->createElement("dist");
-					$name->appendChild($doc->createTextNode($venue->dist));
-					$loc->appendChild($name);
-				}
-				
-				if ($venue->updated) {
-					$name = $doc->createElement("date");
-					$name->appendChild($doc->createTextNode(substr($venue->updated, 0, 10)));
-					$loc->appendChild($name);
-				}
-				
-				if ($venue->source) {
-					$name = $doc->createElement("source");
-					$name->appendChild($doc->createTextNode($venue->source));
-					$loc->appendChild($name);
-				}
-				
-				if ($venue->url) {
-				$name = $doc->createElement("url");
-				$name->appendChild($doc->createTextNode($venue->url));
-				$loc->appendChild($name);
-				}
-				
-				if ($venue->fsqid) {
-					$name = $doc->createElement("fsqid");
-					$name->appendChild($doc->createTextNode($venue->fsqid));
-					$loc->appendChild($name);
-				}
-				
-				foreach ($venue->games as $g) {
-					
-					$game = $doc->createElement("game");
-					
-					$name = $doc->createAttribute("key");
-					$name->appendChild($doc->createTextNode($g->id));
-					$game->appendChild($name);
-					
-					if ($g->deleted) {
-						$name = $doc->createAttribute("deleted");
-						$name->appendChild($doc->createTextNode($g->deleted));
-						$game->appendChild($name);
-					}
-					
-					if ($g->new) {
-					$name = $doc->createAttribute("new");
-					$name->appendChild($doc->createTextNode($g->new));
-					$game->appendChild($name);
-					}
-					
-					if ($g->rare) {
-					$name = $doc->createAttribute("rare");
-					$name->appendChild($doc->createTextNode($g->rare));
-					$game->appendChild($name);
-					}
-					
-					$name = $doc->createElement("abbr");
-					$name->appendChild($doc->createTextNode($g->abbr));
-					$game->appendChild($name);
-					
-					$name = $doc->createElement("cond");
-					$name->appendChild($doc->createTextNode($g->cond));
-					$game->appendChild($name);
-					
-					$name = $doc->createElement("price");
-					$name->appendChild($doc->createTextNode($g->price));
-					$game->appendChild($name);
-					
-					if ($g->name) {
-						$name = $doc->createElement("fullname");
-						$name->appendChild($doc->createTextNode($g->name));
-						$game->appendChild($name);	
-					}
-					
-					$name = $doc->createElement("ipdb");
-					$name->appendChild($doc->createTextNode($g->ipdb));
-					$game->appendChild($name);
-					
-					if ($g->manufacturer) {
-						$name = $doc->createElement("manufacturer");
-						$name->appendChild($doc->createTextNode($g->manufacturer));
-						$game->appendChild($name);	
-					}
-					
-					if ($g->year) {
-						$name = $doc->createElement("year");
-						$name->appendChild($doc->createTextNode($g->year));
-						$game->appendChild($name);	
-					}
-					
-					$loc->appendChild($game);
-					
-				}
-				
-				foreach ($venue->comments as $c) {
-					
-					$comment = $doc->createElement("comment");
-			
-					$name = $doc->createAttribute("key");
-					$name->appendChild($doc->createTextNode($c->id));
-					$comment->appendChild($name);
-					
-					$name = $doc->createElement("ctext");
-					$name->appendChild($doc->createTextNode($c->text));
-					$comment->appendChild($name);
-					
-					if ($c->date) {
-						$name = $doc->createElement("cdate");
-						$name->appendChild($doc->createTextNode(str_replace('T', ' ', substr($c->date, 0, 19))));
-						$comment->appendChild($name);
-					}
-					
-					$loc->appendChild($comment);
-					
-				}
+
+        if ($venue->dist) {
+          $name = $doc->createElement("dist");
+          $name->appendChild($doc->createTextNode($venue->dist));
+          $loc->appendChild($name);
+        }
+
+        if ($venue->updated) {
+          $name = $doc->createElement("date");
+          $name->appendChild($doc->createTextNode(substr($venue->updated, 0, 10)));
+          $loc->appendChild($name);
+        }
+
+        if ($venue->source) {
+          $name = $doc->createElement("source");
+          $name->appendChild($doc->createTextNode($venue->source));
+          $loc->appendChild($name);
+        }
+
+        if ($venue->url) {
+          $name = $doc->createElement("url");
+          $name->appendChild($doc->createTextNode($venue->url));
+          $loc->appendChild($name);
+        }
+
+        if ($venue->fsqid) {
+          $name = $doc->createElement("fsqid");
+          $name->appendChild($doc->createTextNode($venue->fsqid));
+          $loc->appendChild($name);
+        }
+
+        if (!empty($venue->games)) {
+          foreach ($venue->games as $g) {
+
+            $game = $doc->createElement("game");
+
+            $name = $doc->createAttribute("key");
+            $name->appendChild($doc->createTextNode($g->id));
+            $game->appendChild($name);
+
+            if ($g->deleted) {
+              $name = $doc->createAttribute("deleted");
+              $name->appendChild($doc->createTextNode($g->deleted));
+              $game->appendChild($name);
+            }
+
+            if ($g->new) {
+              $name = $doc->createAttribute("new");
+              $name->appendChild($doc->createTextNode($g->new));
+              $game->appendChild($name);
+            }
+
+            if ($g->rare) {
+              $name = $doc->createAttribute("rare");
+              $name->appendChild($doc->createTextNode($g->rare));
+              $game->appendChild($name);
+            }
+
+            $name = $doc->createElement("abbr");
+            $name->appendChild($doc->createTextNode($g->abbr));
+            $game->appendChild($name);
+
+            $name = $doc->createElement("cond");
+            $name->appendChild($doc->createTextNode($g->cond));
+            $game->appendChild($name);
+
+            $name = $doc->createElement("price");
+            $name->appendChild($doc->createTextNode($g->price));
+            $game->appendChild($name);
+
+            if ($g->name) {
+              $name = $doc->createElement("fullname");
+              $name->appendChild($doc->createTextNode($g->name));
+              $game->appendChild($name);
+            }
+
+            $name = $doc->createElement("ipdb");
+            $name->appendChild($doc->createTextNode($g->ipdb));
+            $game->appendChild($name);
+
+            if ($g->manufacturer) {
+              $name = $doc->createElement("manufacturer");
+              $name->appendChild($doc->createTextNode($g->manufacturer));
+              $game->appendChild($name);
+            }
+
+            if ($g->year) {
+              $name = $doc->createElement("year");
+              $name->appendChild($doc->createTextNode($g->year));
+              $game->appendChild($name);
+            }
+
+            $loc->appendChild($game);
+
+          }
+        }
+
+        if (!empty($venue->comments)) {
+          foreach ($venue->comments as $c) {
+
+            $comment = $doc->createElement("comment");
+
+            $name = $doc->createAttribute("key");
+            $name->appendChild($doc->createTextNode($c->id));
+            $comment->appendChild($name);
+
+            $name = $doc->createElement("ctext");
+            $name->appendChild($doc->createTextNode($c->text));
+            $comment->appendChild($name);
+
+            if ($c->date) {
+              $name = $doc->createElement("cdate");
+              $name->appendChild($doc->createTextNode(str_replace('T', ' ', substr($c->date, 0, 19))));
+              $comment->appendChild($name);
+            }
+
+            $loc->appendChild($comment);
+
+          }
+        }
 				
 				if (count($venue->images) > 0) {
 					
@@ -481,36 +485,38 @@ class Result {
 					$loc->appendChild($leagues);
 					
 				}
-				
-				foreach ($venue->tournaments as $t) {
-					
-					$contest = $doc->createElement("contest");
-					
-					$name = $doc->createAttribute("key");
-					$name->appendChild($doc->createTextNode($t->id));
-					$contest->appendChild($name);
-					
-					if ($t->ifpaId) {
-						$name = $doc->createAttribute("ifpa");
-						$name->appendChild($doc->createTextNode($t->ifpaId));
-						$contest->appendChild($name);
-					}
-					
-					$name = $doc->createElement("desc");
-					$name->appendChild($doc->createTextNode($t->name));
-					$contest->appendChild($name);
-					
-					if ($t->dateFrom) {
-						
-						$name = $doc->createElement("contestdate");
-						$name->appendChild($doc->createTextNode($t->dateFrom));
-						$contest->appendChild($name);
-						
-					}
-					
-					$loc->appendChild($contest);
-					
-				}
+
+        if (!empty($venue->tournaments)) {
+          foreach ($venue->tournaments as $t) {
+
+            $contest = $doc->createElement("contest");
+
+            $name = $doc->createAttribute("key");
+            $name->appendChild($doc->createTextNode($t->id));
+            $contest->appendChild($name);
+
+            if ($t->ifpaId) {
+              $name = $doc->createAttribute("ifpa");
+              $name->appendChild($doc->createTextNode($t->ifpaId));
+              $contest->appendChild($name);
+            }
+
+            $name = $doc->createElement("desc");
+            $name->appendChild($doc->createTextNode($t->name));
+            $contest->appendChild($name);
+
+            if ($t->dateFrom) {
+
+              $name = $doc->createElement("contestdate");
+              $name->appendChild($doc->createTextNode($t->dateFrom));
+              $contest->appendChild($name);
+
+            }
+
+            $loc->appendChild($contest);
+
+          }
+        }
 				
 			}
 			
