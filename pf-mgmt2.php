@@ -385,12 +385,12 @@
       </div>
     </div>
 
-    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-1.10.1.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="js/underscore-min.js"></script>
     <script src="js/knockout-3.0.0.js"></script>
     <script src="js/path.min.js"></script>
-    <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCMWL8VtaTA5ORZro3vPvwfZxWel1sgwPg&amp;sensor=false"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCMWL8VtaTA5ORZro3vPvwfZxWel1sgwPg&amp;sensor=false"></script>
     <script src="js/jquery.pf.js"></script>
     <script src="js/jquery.pf.fsq.js"></script>
     <script src="js/pf-auth.js"></script>
