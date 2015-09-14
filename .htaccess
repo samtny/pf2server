@@ -4,3 +4,12 @@ ForceType application/x-httpd-php
 <Files fsq>
 ForceType application/x-httpd-php
 </Files>
+<IfModule mod_rewrite.c>
+  RewriteEngine on
+
+  # Redirect HTTP to HTTPS - as per https://docs.acquia.com/articles/redirecting-traffic-between-http-and-https-acquia-cloud;
+  RewriteCond %{REQUEST_URI} ^/pf2/pf-mgmt2.php [NC]
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !https
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
