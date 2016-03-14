@@ -1,0 +1,87 @@
+<!ELEMENT pinfinderapp (status?, meta?, locations?)>
+<!ELEMENT status (#PCDATA)>
+<!ELEMENT meta (q?, t?, n?, l?, p?, o?, dict?, user?, stats?, message?)>
+<!ELEMENT q (#PCDATA)>
+<!ELEMENT t (#PCDATA)>
+<!ELEMENT n (#PCDATA)>
+<!ELEMENT l (#PCDATA)>
+<!ELEMENT p (#PCDATA)>
+<!ELEMENT o (#PCDATA)>
+<!ELEMENT dict (entry*)>
+<!ELEMENT entry (#PCDATA)>
+<!ATTLIST entry key CDATA #REQUIRED>
+<!ELEMENT user (token*)>
+<!ATTLIST user key CDATA #IMPLIED>
+<!ELEMENT token (#PCDATA)>
+<!ATTLIST token key CDATA #IMPLIED>
+<!ATTLIST token service CDATA #IMPLIED>
+<!ELEMENT stats EMPTY>
+<!ATTLIST stats notifications CDATA #IMPLIED>
+<!ELEMENT message (title?, body?)>
+<!ATTLIST message key CDATA #IMPLIED>
+<!ELEMENT title (#PCDATA)>
+<!ELEMENT body (#PCDATA)>
+<!ELEMENT locations (loc*)>
+<!ATTLIST locations count CDATA #IMPLIED>
+<!ELEMENT loc (name, addr?, city?, state?, zipcode?, neighborhood?, country?, phone?, lat?, lon?, dist?, date?, source?, url?, fsqid?, game*, comment*, images?, leagues?, contest*)>
+<!ATTLIST loc key CDATA #IMPLIED>
+<!ATTLIST loc miles CDATA #IMPLIED>
+<!ATTLIST loc flag (0|1|A|U|X|Z) "0">
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT addr (#PCDATA)>
+<!ELEMENT city (#PCDATA)>
+<!ELEMENT state (#PCDATA)>
+<!ELEMENT zipcode (#PCDATA)>
+<!ELEMENT neighborhood (#PCDATA)>
+<!ELEMENT country (#PCDATA)>
+<!ELEMENT phone (#PCDATA)>
+<!ELEMENT lat (#PCDATA)>
+<!ELEMENT lon (#PCDATA)>
+<!ELEMENT dist (#PCDATA)>
+<!ELEMENT date (#PCDATA)>
+<!ELEMENT source (#PCDATA)>
+<!ELEMENT url (#PCDATA)>
+<!ELEMENT fsqid (#PCDATA)>
+<!ELEMENT game (abbr?, cond?, price?, fullname?, ipdb?, manufacturer?, year?)>
+<!ATTLIST game key CDATA #IMPLIED>
+<!ATTLIST game deleted (0|1) "0">
+<!ATTLIST game new (0|1) "0">
+<!ATTLIST game rare (0|1) "0">
+<!ELEMENT abbr (#PCDATA)>
+<!ELEMENT cond (#PCDATA)>
+<!ELEMENT price (#PCDATA)>
+<!ELEMENT fullname (#PCDATA)>
+<!ELEMENT ipdb (#PCDATA)>
+<!ELEMENT manufacturer (#PCDATA)>
+<!ELEMENT year (#PCDATA)>
+<!ELEMENT comment (ctext?, cdate?)>
+<!ATTLIST comment key CDATA #IMPLIED>
+<!ELEMENT ctext (#PCDATA)>
+<!ELEMENT cdate (#PCDATA)>
+<!ELEMENT images (image*)>
+<!ATTLIST images count CDATA #IMPLIED>
+<!ELEMENT image (#PCDATA)>
+<!ATTLIST image url CDATA #IMPLIED>
+<!ATTLIST image thumb CDATA #IMPLIED>
+<!ATTLIST image default CDATA #IMPLIED>
+<!ELEMENT imageurl (#PCDATA)>
+<!ELEMENT thumburl (#PCDATA)>
+<!ELEMENT leagues (league*)>
+<!ATTLIST leagues count CDATA #IMPLIED>
+<!ELEMENT league (leaguename?, teams?)>
+<!ATTLIST league key CDATA #IMPLIED>
+<!ELEMENT leaguename (#PCDATA)>
+<!ELEMENT teams (team*)>
+<!ATTLIST teams count CDATA #IMPLIED>
+<!ELEMENT team (teamname?)>
+<!ATTLIST team key CDATA #IMPLIED>
+<!ELEMENT teamname (#PCDATA)>
+<!ELEMENT contest (desc?, freq?, contact?, winner?, contestdate?)>
+<!ATTLIST contest key CDATA #IMPLIED>
+<!ATTLIST contest ifpa CDATA #IMPLIED>
+<!ELEMENT desc (#PCDATA)>
+<!ELEMENT freq (#PCDATA)>
+<!ELEMENT contact (#PCDATA)>
+<!ELEMENT winner (#PCDATA)>
+<!ELEMENT contestdate (#PCDATA)>
+<!ENTITY author "Sam Thompson">
