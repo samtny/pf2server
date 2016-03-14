@@ -286,6 +286,12 @@ class Result {
           $loc->appendChild($name);
         }
 
+				if ($venue->created) {
+					$name = $doc->createElement("created");
+					$name->appendChild($doc->createTextNode(substr($venue->created, 0, 10)));
+					$loc->appendChild($name);
+				}
+
         if ($venue->source) {
           $name = $doc->createElement("source");
           $name->appendChild($doc->createTextNode($venue->source));
@@ -610,6 +616,7 @@ class Venue {
   public $sourceid;
 	public $url;
 	public $dist;
+	public $created;
 	public $updated;
 	public $flag;
 	public $fsqid;

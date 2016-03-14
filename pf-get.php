@@ -264,6 +264,7 @@ function get_venue_result($q, $t, $n, $l, $p, $o) {
 
 					}
 					$venue->updated = date('c', strtotime($vrow["venueupdated"]));
+					$venue->created = date('c', strtotime($vrow["venuecreated"]));
 					
 					$venue->flag = $vrow["flag"];
 					
