@@ -23,7 +23,7 @@
 <!ELEMENT body (#PCDATA)>
 <!ELEMENT locations (loc*)>
 <!ATTLIST locations count CDATA #IMPLIED>
-<!ELEMENT loc (name, addr?, city?, state?, zipcode?, neighborhood?, country?, phone?, lat?, lon?, dist?, date?, source?, url?, fsqid?, game*, comment*, images?, leagues?, contest*)>
+<!ELEMENT loc (name, addr?, city?, state?, zipcode?, neighborhood?, country?, phone?, lat?, lon?, dist?, date?, created?, source?, url?, fsqid?, game*, comment*, images?, leagues?, contest*)>
 <!ATTLIST loc key CDATA #IMPLIED>
 <!ATTLIST loc miles CDATA #IMPLIED>
 <!ATTLIST loc flag (0|1|A|U|X|Z) "0">
@@ -39,6 +39,7 @@
 <!ELEMENT lon (#PCDATA)>
 <!ELEMENT dist (#PCDATA)>
 <!ELEMENT date (#PCDATA)>
+<!ELEMENT created (#PCDATA)>
 <!ELEMENT source (#PCDATA)>
 <!ELEMENT url (#PCDATA)>
 <!ELEMENT fsqid (#PCDATA)>
